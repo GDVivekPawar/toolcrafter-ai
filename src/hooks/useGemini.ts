@@ -17,15 +17,10 @@ export const useGemini = () => {
       return;
     }
     
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) {
-      toast({
-        title: "API Key Missing",
-        description: "Please provide your Google Gemini API key to proceed.",
-        variant: "destructive"
-      });
-      return;
-    }
+    // WARNING: For demonstration purposes, the API key is hardcoded below.
+    // This is insecure for production applications. It's better to use
+    // environment variables, which can be configured in your project settings.
+    const apiKey = "AIzaSyDU28Mmx4nJIhv4HHiQl3cZA4ccfGsYP7c";
 
     setIsProcessing(true);
     setGeneratedTool(null);
