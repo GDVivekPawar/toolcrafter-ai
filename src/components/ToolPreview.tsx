@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Download, Share, Code, Volume2, VolumeX, FileText } from 'lucide-react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { exportToText, exportToPDF } from '@/utils/exportUtils';
+import LivePreviewModal from './LivePreviewModal';
 
 interface ToolPreviewProps {
   tool: {
@@ -18,6 +19,7 @@ interface ToolPreviewProps {
 
 const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
   const { speak, stopSpeaking, isSpeaking } = useTextToSpeech();
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleTextToSpeech = () => {
     if (!tool) return;
@@ -73,111 +75,120 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
   }
 
   return (
-    <Card className="border-green-200 shadow-lg" role="region" aria-label="Generated accessibility tool">
-      <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Eye className="h-5 w-5" aria-hidden="true" />
-            <span>Generated Tool Preview</span>
+    <>
+      <Card className="border-green-200 shadow-lg" role="region" aria-label="Generated accessibility tool">
+        <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Eye className="h-5 w-5" aria-hidden="true" />
+              <span>Generated Tool Preview</span>
+            </div>
+            <Button
+              onClick={handleTextToSpeech}
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/20"
+              aria-label={isSpeaking ? "Stop reading tool description" : "Read tool description aloud"}
+              title={isSpeaking ? "Stop reading" : "Read aloud"}
+            >
+              {isSpeaking ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{tool.toolName}</h3>
           </div>
-          <Button
-            onClick={handleTextToSpeech}
-            variant="ghost"
-            size="sm"
-            className="text-white hover:bg-white/20"
-            aria-label={isSpeaking ? "Stop reading tool description" : "Read tool description aloud"}
-            title={isSpeaking ? "Stop reading" : "Read aloud"}
-          >
-            {isSpeaking ? (
-              <VolumeX className="h-4 w-4" />
-            ) : (
-              <Volume2 className="h-4 w-4" />
-            )}
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-6 space-y-6">
-        <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{tool.toolName}</h3>
-        </div>
 
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
-          <ul className="grid grid-cols-1 md:grid-cols-2 gap-2" role="list">
-            {tool.features.map((feature, index) => (
-              <li key={index} className="flex items-center space-x-2 text-sm text-gray-700">
-                <div className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true"></div>
-                <span>{feature}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Implementation Steps:</h4>
-          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700" role="list">
-            {tool.implementation.map((step, index) => (
-              <li key={index}>{step}</li>
-            ))}
-          </ol>
-        </div>
-
-        <div>
-          <h4 className="font-semibold text-gray-900 mb-3">Suggested UI Components:</h4>
-          <div className="flex flex-wrap gap-2" role="list">
-            {tool.uiComponents.map((component, index) => (
-              <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-                {component}
-              </span>
-            ))}
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-2" role="list">
+              {tool.features.map((feature, index) => (
+                <li key={index} className="flex items-center space-x-2 text-sm text-gray-700">
+                  <div className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true"></div>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
+          
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3">Implementation Steps:</h4>
+            <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700" role="list">
+              {tool.implementation.map((step, index) => (
+                <li key={index}>{step}</li>
+              ))}
+            </ol>
+          </div>
 
-        <div className="flex flex-wrap gap-3 pt-6 border-t" role="group" aria-label="Tool actions">
-          <Button 
-            className="bg-blue-500 hover:bg-blue-600 text-white"
-            aria-label="View live preview of the tool"
-          >
-            <Eye className="h-4 w-4 mr-2" aria-hidden="true" />
-            Live Preview
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-green-500 text-green-600 hover:bg-green-50"
-            onClick={() => exportToText(tool)}
-            aria-label="Download tool specification as text file"
-          >
-            <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
-            Download TXT
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-purple-500 text-purple-600 hover:bg-purple-50"
-            onClick={() => exportToPDF(tool)}
-            aria-label="Download tool specification as PDF"
-          >
-            <Download className="h-4 w-4 mr-2" aria-hidden="true" />
-            Download PDF
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-gray-500 text-gray-600 hover:bg-gray-50"
-            aria-label="Share tool specification"
-          >
-            <Share className="h-4 w-4 mr-2" aria-hidden="true" />
-            Share
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-gray-500 text-gray-600 hover:bg-gray-50"
-            aria-label="View implementation code"
-          >
-            <Code className="h-4 w-4 mr-2" aria-hidden="true" />
-            View Code
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3">Suggested UI Components:</h4>
+            <div className="flex flex-wrap gap-2" role="list">
+              {tool.uiComponents.map((component, index) => (
+                <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                  {component}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3 pt-6 border-t" role="group" aria-label="Tool actions">
+            <Button 
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              aria-label="View live preview of the tool"
+              onClick={() => setIsPreviewOpen(true)}
+            >
+              <Eye className="h-4 w-4 mr-2" aria-hidden="true" />
+              Live Preview
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-green-500 text-green-600 hover:bg-green-50"
+              onClick={() => exportToText(tool)}
+              aria-label="Download tool specification as text file"
+            >
+              <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
+              Download TXT
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-purple-500 text-purple-600 hover:bg-purple-50"
+              onClick={() => exportToPDF(tool)}
+              aria-label="Download tool specification as PDF"
+            >
+              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
+              Download PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-gray-500 text-gray-600 hover:bg-gray-50"
+              aria-label="Share tool specification"
+            >
+              <Share className="h-4 w-4 mr-2" aria-hidden="true" />
+              Share
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-gray-500 text-gray-600 hover:bg-gray-50"
+              aria-label="View implementation code"
+            >
+              <Code className="h-4 w-4 mr-2" aria-hidden="true" />
+              View Code
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <LivePreviewModal 
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        tool={tool}
+      />
+    </>
   );
 };
 
