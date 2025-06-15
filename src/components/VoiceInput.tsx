@@ -13,7 +13,6 @@ interface VoiceInputProps {
 const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setIsListening }) => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,7 +39,6 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
         if (finalTranscript) {
           console.log('Voice input received:', finalTranscript);
           onTranscript(finalTranscript);
-          setRetryCount(0); // Reset retry count on successful recognition
         }
       };
 
@@ -49,14 +47,14 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
         setHasError(true);
         setIsListening(false);
         
-        // Handle different error types
+        // Handle different error types without auto-retry
         let errorMessage = "Voice input error occurred.";
         let description = "Please try again.";
         
         switch (event.error) {
           case 'network':
             errorMessage = "Network Error";
-            description = "Check your internet connection and try again.";
+            description = "Check your internet connection and try again manually.";
             break;
           case 'no-speech':
             errorMessage = "No Speech Detected";
@@ -89,14 +87,6 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
       recognitionRef.current.onend = () => {
         console.log('Voice recognition ended');
         setIsListening(false);
-        
-        // Auto-retry for certain errors (max 2 retries)
-        if (hasError && retryCount < 2) {
-          setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-            startListening();
-          }, 1000);
-        }
       };
     }
 
@@ -106,12 +96,13 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
         recognitionRef.current = null;
       }
     };
-  }, [onTranscript, setIsListening, toast, hasError, retryCount]);
+  }, [onTranscript, setIsListening, toast]);
 
   const startListening = () => {
     if (!recognitionRef.current) return;
     
     try {
+      setHasError(false);
       recognitionRef.current.start();
       setIsListening(true);
       toast({
@@ -165,7 +156,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
       {hasError ? (
         <>
           <AlertCircle className="h-4 w-4 mr-2" />
-          Retry Voice
+          Try Again
         </>
       ) : isListening ? (
         <>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -60,6 +59,11 @@ const templates = [
 ];
 
 const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) => {
+  const handleTemplateClick = (template: typeof templates[0]) => {
+    console.log('Template clicked:', template.title);
+    onTemplateSelect(template.prompt);
+  };
+
   return (
     <Card className="border-gray-700/40 shadow-2xl bg-gray-800/90 backdrop-blur-xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white">
@@ -73,7 +77,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
           {templates.map((template, index) => (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-2xl border border-gray-600/60 bg-gray-700/70 backdrop-blur-sm hover:bg-gray-600/90 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer"
+              className="group relative overflow-hidden rounded-2xl border border-gray-600/60 bg-gray-700/70 backdrop-blur-sm hover:bg-gray-600/90 transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
               <div className="p-6">
                 <div className="flex items-start space-x-4">
@@ -89,8 +93,8 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
                     </p>
                     <Button
                       size="sm"
-                      onClick={() => onTemplateSelect(template.prompt)}
-                      className={`bg-gradient-to-r ${template.gradient} hover:shadow-lg text-white border-0 font-semibold px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105`}
+                      onClick={() => handleTemplateClick(template)}
+                      className={`bg-gradient-to-r ${template.gradient} hover:shadow-lg text-white border-0 font-semibold px-4 py-2 rounded-lg transition-all duration-300 hover:scale-105 cursor-pointer`}
                     >
                       Try This Tool
                     </Button>
