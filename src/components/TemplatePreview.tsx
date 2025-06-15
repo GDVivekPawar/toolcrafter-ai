@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Volume2, VolumeX, Zap, RotateCcw, ExternalLink } from 'lucide-react';
+import { Eye, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 import { useVoiceGuide } from '@/hooks/useVoiceGuide';
-import { deployTool } from '@/services/deployService';
 import { ToolTemplate, TemplateMatch } from '@/types/template';
 
 interface TemplatePreviewProps {
@@ -14,6 +14,18 @@ interface TemplatePreviewProps {
   onReset: () => void;
 }
 
+const getHowToUseText = (templateId: string | undefined): string => {
+  if (!templateId) return "No instructions available for this tool.";
+  switch (templateId) {
+      case 'focus-timer':
+          return "To use the Focus Timer, first set your desired work duration using the plus and minus one minute buttons. When you are ready, press Start. The timer will count down. You can pause and resume the timer at any time. Press Reset to start over with the default 25 minutes.";
+      case 'medication-reminder':
+          return "To use the Medication Reminder, add a new medication by typing its name, selecting a time, and clicking 'Add Reminder'. Your reminders will appear in the list. When you take your medication, click the 'Take' button to mark it as complete. The button will change to 'Taken'. You can click it again to undo.";
+      default:
+          return "This is an interactive tool. Follow the on-screen instructions to use its features.";
+  }
+}
+
 const TemplatePreview: React.FC<TemplatePreviewProps> = ({ 
   template, 
   match, 
@@ -21,9 +33,16 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   onReset 
 }) => {
   const { speak, stopSpeaking, isSpeaking } = useTextToSpeech();
-  const { announceToolReady } = useVoiceGuide({ disableWelcome: true });
+  const { announceToolReady, scrollToElement } = useVoiceGuide({ disableWelcome: true });
   const [showLivePreview, setShowLivePreview] = useState(false);
   const [hasAnnouncedReady, setHasAnnouncedReady] = useState(false);
+  const [speakingSource, setSpeakingSource] = useState<null | 'description' | 'livetool'>(null);
+
+  useEffect(() => {
+    if (!isSpeaking) {
+      setSpeakingSource(null);
+    }
+  }, [isSpeaking]);
 
   // Announce when tool is ready
   useEffect(() => {
@@ -41,24 +60,31 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   const handleTextToSpeech = () => {
     if (!template) return;
     
-    if (isSpeaking) {
+    if (speakingSource === 'description') {
       stopSpeaking();
-      return;
+    } else {
+      const textToSpeak = `
+        Tool: ${template.name}. 
+        Description: ${template.description}. 
+        Features: ${template.features.join(', ')}.
+        ${match ? `Match confidence: ${Math.round(match.confidence * 100)}%` : ''}
+      `;
+      speak(textToSpeak);
+      setSpeakingSource('description');
     }
-
-    const textToSpeak = `
-      Tool: ${template.name}. 
-      Description: ${template.description}. 
-      Features: ${template.features.join(', ')}.
-      ${match ? `Match confidence: ${Math.round(match.confidence * 100)}%` : ''}
-    `;
-    
-    speak(textToSpeak);
   };
 
-  const handleDeploy = () => {
+  const handleLiveToolNarration = () => {
     if (!template) return;
-    deployTool(template);
+    
+    if (speakingSource === 'livetool') {
+        stopSpeaking();
+    } else {
+        const textToSpeak = getHowToUseText(template.id);
+        speak(textToSpeak);
+        setSpeakingSource('livetool');
+        scrollToElement('live-tool-preview', 200);
+    }
   };
 
   if (isProcessing) {
@@ -99,7 +125,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
                 size="sm"
                 className="text-white hover:bg-white/20"
               >
-                {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                {speakingSource === 'description' ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
               </Button>
               <Button
                 onClick={onReset}
@@ -148,36 +174,42 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
               <Eye className="h-4 w-4 mr-2" />
               Use This Tool
             </Button>
-            <Button 
-              className="bg-green-600 hover:bg-green-700 text-white"
-              onClick={handleDeploy}
-            >
-              <ExternalLink className="h-4 w-4 mr-2" />
-              Deploy Tool
-            </Button>
           </div>
         </CardContent>
       </Card>
 
       {showLivePreview && (
-        <Card className="border-purple-200 shadow-lg mt-6">
-          <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
-            <CardTitle className="flex items-center justify-between">
-              <span>Live Tool</span>
-              <Button
-                onClick={() => setShowLivePreview(false)}
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/20"
-              >
-                ✕
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-6">
-            <template.component />
-          </CardContent>
-        </Card>
+        <div id="live-tool-preview" className="mt-6">
+          <Card className="border-purple-200 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+              <CardTitle className="flex items-center justify-between">
+                <span>Live Tool</span>
+                <div className="flex items-center space-x-2">
+                  <Button
+                      onClick={handleLiveToolNarration}
+                      variant="ghost"
+                      size="sm"
+                      className="text-white hover:bg-white/20"
+                      aria-label={speakingSource === 'livetool' ? "Stop narrator" : "Start narrator for live tool"}
+                  >
+                      {speakingSource === 'livetool' ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    onClick={() => setShowLivePreview(false)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-white hover:bg-white/20"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <template.component />
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

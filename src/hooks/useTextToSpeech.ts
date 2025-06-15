@@ -18,8 +18,6 @@ export const useTextToSpeech = () => {
 
     if (speechSynthesis.speaking) {
       speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -29,13 +27,9 @@ export const useTextToSpeech = () => {
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => {
+    utterance.onerror = (event) => {
       setIsSpeaking(false);
-      toast({
-        title: "Speech Error",
-        description: "There was an error with text-to-speech playback.",
-        variant: "destructive"
-      });
+      console.error("Speech synthesis error:", event.error);
     };
 
     speechSynthesis.speak(utterance);
