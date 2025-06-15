@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Timer, Brain, CheckSquare, Bell, Headphones, Heart, Zap } from 'lucide-react';
+import { useTemplateEngine } from '@/hooks/useTemplateEngine';
 
 interface TemplateGalleryProps {
   onTemplateSelect: (template: string) => void;
@@ -10,45 +10,45 @@ interface TemplateGalleryProps {
 
 const templates = [
   {
-    icon: Calendar,
-    title: "ADHD Daily Planner",
-    description: "Break down tasks into manageable steps with reminders",
-    prompt: "Create a voice-controlled daily planner for ADHD that breaks tasks into small, manageable steps with audio reminders and visual progress tracking. Include dopamine rewards and flexible scheduling.",
+    icon: Timer,
+    title: "Focus Timer",
+    description: "Pomodoro timer with audio cues and accessibility features",
+    prompt: "I need a focus timer with voice announcements for work sessions",
     color: "blue"
   },
   {
-    icon: Timer,
-    title: "Pomodoro Focus Timer",
-    description: "Customizable work/break intervals with calming transitions",
-    prompt: "Design a Pomodoro timer specifically for neurodivergent users with customizable work/break intervals, gentle transition sounds, and visual cues that don't overwhelm. Include fidget-friendly interface elements.",
+    icon: Calendar,
+    title: "Daily Task Planner",
+    description: "Break down daily tasks with time estimates and progress tracking",
+    prompt: "I want to plan my daily tasks with time estimates and completion tracking",
     color: "green"
   },
   {
+    icon: Heart,
+    title: "Sensory Break Tool",
+    description: "Guided breathing exercises and sensory regulation activities",
+    prompt: "I need a tool for sensory breaks with breathing exercises and calming activities",
+    color: "pink"
+  },
+  {
     icon: Brain,
-    title: "Memory Support Tool",
-    description: "Visual and audio memory aids for daily tasks",
-    prompt: "Build a memory support tool that uses both visual and audio cues to help with daily tasks, medication reminders, and important appointments. Include spaced repetition and gentle notifications.",
+    title: "Memory Support",
+    description: "Coming soon - Visual and audio memory aids",
+    prompt: "memory support tool with visual and audio cues for daily tasks",
     color: "purple"
   },
   {
     icon: CheckSquare,
     title: "Executive Function Helper",
-    description: "Step-by-step guidance for complex tasks",
-    prompt: "Create an executive function support tool that breaks complex tasks into step-by-step instructions with visual checkboxes, time estimates, and optional voice guidance for each step.",
+    description: "Coming soon - Step-by-step guidance for complex tasks",
+    prompt: "executive function support tool that breaks complex tasks into steps",
     color: "orange"
-  },
-  {
-    icon: Bell,
-    title: "Sensory Break Reminder",
-    description: "Personalized sensory regulation alerts",
-    prompt: "Design a sensory break reminder system that learns user patterns and suggests appropriate sensory regulation activities based on time of day, stress levels, and personal preferences.",
-    color: "pink"
   },
   {
     icon: Headphones,
     title: "Audio Processing Aid",
-    description: "Text-to-speech with adjustable speed and clarity",
-    prompt: "Build an audio processing aid that converts text to speech with adjustable speed, pitch, and clarity. Include word highlighting, pause controls, and background noise filtering options.",
+    description: "Coming soon - Text-to-speech with adjustable settings",
+    prompt: "audio processing aid that converts text to speech with speed controls",
     color: "indigo"
   }
 ];
@@ -59,7 +59,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
       <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
         <CardTitle className="flex items-center space-x-2">
           <Zap className="h-5 w-5" />
-          <span>Accessibility Tool Templates</span>
+          <span>Quick Start Templates</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
@@ -85,8 +85,9 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
                     variant="outline"
                     onClick={() => onTemplateSelect(template.prompt)}
                     className="text-xs border-gray-300 hover:bg-gray-50"
+                    disabled={template.description.includes("Coming soon")}
                   >
-                    Use Template
+                    {template.description.includes("Coming soon") ? "Coming Soon" : "Try This"}
                   </Button>
                 </div>
               </div>
