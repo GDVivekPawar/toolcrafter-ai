@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Volume2, VolumeX, Zap, RotateCcw } from 'lucide-react';
+import { Eye, Volume2, VolumeX, Zap, RotateCcw, ExternalLink } from 'lucide-react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useVoiceGuide } from '@/hooks/useVoiceGuide';
+import { deployTool } from '@/services/deployService';
 import { ToolTemplate, TemplateMatch } from '@/types/template';
 
 interface TemplatePreviewProps {
@@ -20,7 +22,22 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   onReset 
 }) => {
   const { speak, stopSpeaking, isSpeaking } = useTextToSpeech();
+  const { announceToolReady } = useVoiceGuide();
   const [showLivePreview, setShowLivePreview] = useState(false);
+  const [hasAnnouncedReady, setHasAnnouncedReady] = useState(false);
+
+  // Announce when tool is ready
+  useEffect(() => {
+    if (template && !isProcessing && !hasAnnouncedReady) {
+      setHasAnnouncedReady(true);
+      announceToolReady();
+    }
+  }, [template, isProcessing, hasAnnouncedReady, announceToolReady]);
+
+  // Reset announcement flag when template changes
+  useEffect(() => {
+    setHasAnnouncedReady(false);
+  }, [template?.id]);
 
   const handleTextToSpeech = () => {
     if (!template) return;
@@ -38,6 +55,11 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     `;
     
     speak(textToSpeak);
+  };
+
+  const handleDeploy = () => {
+    if (!template) return;
+    deployTool(template);
   };
 
   if (isProcessing) {
@@ -63,7 +85,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   if (!template) return null;
 
   return (
-    <>
+    <div id="tool-preview">
       <Card className="border-green-200 shadow-lg">
         <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
           <CardTitle className="flex items-center justify-between">
@@ -129,11 +151,10 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             </Button>
             <Button 
               className="bg-green-600 hover:bg-green-700 text-white"
-              disabled
-              title="Deployment feature coming soon"
+              onClick={handleDeploy}
             >
-              <Zap className="h-4 w-4 mr-2" />
-              Deploy
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Deploy Tool
             </Button>
           </div>
         </CardContent>
@@ -159,7 +180,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
           </CardContent>
         </Card>
       )}
-    </>
+    </div>
   );
 };
 

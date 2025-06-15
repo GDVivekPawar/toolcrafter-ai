@@ -12,6 +12,7 @@ import { useGemini } from '@/hooks/useGemini';
 import HighContrastToggle from '@/components/HighContrastToggle';
 import Footer from '@/components/Footer';
 import { useTemplateEngine } from '@/hooks/useTemplateEngine';
+import { useVoiceGuide } from '@/hooks/useVoiceGuide';
 
 const Index = () => {
   const [prompt, setPrompt] = useState('');
@@ -27,6 +28,9 @@ const Index = () => {
     resetSelection,
     getAvailableTemplates
   } = useTemplateEngine();
+
+  // Initialize voice guide
+  useVoiceGuide();
 
   const handleVoiceInput = (transcript: string) => {
     setPrompt(transcript);
