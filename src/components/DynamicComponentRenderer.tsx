@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ErrorBoundary from './ErrorBoundary';
+import { useAccessibleTimer, announceToScreenReader, speakText } from '@/utils/accessibilityUtils';
 
 // Import React hooks and essentials
 import * as ReactScope from 'react';
@@ -31,10 +32,19 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // This scope provides the dependencies for the dynamically generated code.
+    // Validate code before execution
+    const validationResult = validateCode(code);
+    
+    if (!validationResult.isValid) {
+      setError(validationResult.error);
+      setComponent(null);
+      return;
+    }
+
+    // Enhanced scope with more utilities
     const scope = {
       ...ReactScope,
-      ...LucideIcons, // Use the entire LucideIcons object directly
+      ...LucideIcons,
       Button,
       Card, CardContent, CardHeader, CardTitle,
       Input,
@@ -47,6 +57,20 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
       RadioGroup, RadioGroupItem,
       Avatar, AvatarFallback, AvatarImage,
       Progress,
+      // Accessibility utilities
+      useAccessibleTimer,
+      announceToScreenReader,
+      speakText,
+      // Additional utilities
+      console,
+      setTimeout,
+      clearTimeout,
+      setInterval,
+      clearInterval,
+      Date,
+      Math,
+      JSON,
+      localStorage: typeof window !== 'undefined' ? window.localStorage : null,
     };
 
     try {
@@ -62,7 +86,18 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
       }
     } catch (e: any) {
       console.error("Error creating dynamic component:", e);
-      setError(e.message);
+      
+      // Provide more specific error messages
+      let errorMessage = e.message;
+      if (e.message.includes('Unexpected token')) {
+        errorMessage = `Syntax Error: ${e.message}. Check for missing brackets, quotes, or semicolons.`;
+      } else if (e.message.includes('is not defined')) {
+        errorMessage = `Reference Error: ${e.message}. Make sure all variables and functions are properly defined.`;
+      } else if (e.message.includes('Cannot read properties')) {
+        errorMessage = `Type Error: ${e.message}. Check for null or undefined values.`;
+      }
+      
+      setError(errorMessage);
       setComponent(null);
     }
   }, [code]);
@@ -70,9 +105,18 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
   if (error) {
     return (
       <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-        <h2 className="font-bold">Compilation Error</h2>
-        <p>There was an error compiling the generated code.</p>
-        <pre className="mt-2 text-sm bg-red-50 p-2 rounded">{error}</pre>
+        <h2 className="font-bold">Code Compilation Error</h2>
+        <p className="mt-2">The generated code has compilation issues:</p>
+        <pre className="mt-2 text-sm bg-red-50 p-2 rounded overflow-auto max-h-40">{error}</pre>
+        <div className="mt-3 text-sm">
+          <p><strong>Common fixes:</strong></p>
+          <ul className="list-disc list-inside mt-1">
+            <li>Check icon names are PascalCase (Play, not play)</li>
+            <li>Ensure all brackets and parentheses are matched</li>
+            <li>Add missing semicolons at line ends</li>
+            <li>Verify React hooks are used correctly</li>
+          </ul>
+        </div>
       </div>
     );
   }
@@ -82,6 +126,64 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
       {Component ? <Component /> : <p>Loading component...</p>}
     </ErrorBoundary>
   );
+};
+
+// Code validation function
+const validateCode = (code: string): { isValid: boolean; error: string } => {
+  try {
+    // Check for basic component structure
+    if (!code.includes('const ToolComponent')) {
+      return {
+        isValid: false,
+        error: 'Component must be named "ToolComponent" and use const declaration'
+      };
+    }
+
+    // Check for proper React import usage
+    if (code.includes('React.') && !code.includes('import React')) {
+      return {
+        isValid: false,
+        error: 'React is available in scope, no need to import or use React.functionName'
+      };
+    }
+
+    // Check for common icon case issues
+    const lowercaseIcons = ['<play', '<pause', '<timer', '<settings'];
+    for (const icon of lowercaseIcons) {
+      if (code.toLowerCase().includes(icon)) {
+        return {
+          isValid: false,
+          error: `Icon names must be PascalCase. Use ${icon.charAt(1).toUpperCase() + icon.slice(2)} instead of ${icon.slice(1)}`
+        };
+      }
+    }
+
+    // Check for unmatched brackets (basic check)
+    const openBrackets = (code.match(/{/g) || []).length;
+    const closeBrackets = (code.match(/}/g) || []).length;
+    if (openBrackets !== closeBrackets) {
+      return {
+        isValid: false,
+        error: `Mismatched curly brackets: ${openBrackets} opening, ${closeBrackets} closing`
+      };
+    }
+
+    const openParens = (code.match(/\(/g) || []).length;
+    const closeParens = (code.match(/\)/g) || []).length;
+    if (openParens !== closeParens) {
+      return {
+        isValid: false,
+        error: `Mismatched parentheses: ${openParens} opening, ${closeParens} closing`
+      };
+    }
+
+    return { isValid: true, error: '' };
+  } catch (e: any) {
+    return {
+      isValid: false,
+      error: `Validation error: ${e.message}`
+    };
+  }
 };
 
 export default DynamicComponentRenderer;

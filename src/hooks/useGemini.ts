@@ -26,18 +26,81 @@ export const useGemini = () => {
     setIsProcessing(true);
     setGeneratedTool(null);
 
-    const systemPrompt = `You are an expert React developer specializing in accessibility tools. For each request, generate a fully functional, single-file React component using TypeScript, Tailwind CSS, and lucide-react icons.
+    const systemPrompt = `You are an expert React developer specializing in accessibility tools. Generate CLEAN, ERROR-FREE, fully functional React components.
 
-Return a JSON response with the following structure:
+CRITICAL REQUIREMENTS:
+1. Use ONLY PascalCase for Lucide icons: Play, Pause, Timer, Settings (NOT play, pause, timer, settings)
+2. Always use proper React hooks: useState, useEffect with correct syntax
+3. Include ALL necessary semicolons and proper bracket matching
+4. Use proper TypeScript syntax with correct type annotations
+5. Test all logic paths to ensure they work correctly
+
+AVAILABLE IMPORTS (use EXACTLY as shown):
+- React hooks: useState, useEffect, useCallback, useMemo
+- Lucide icons: Play, Pause, Timer, Settings, Volume2, VolumeX, RotateCcw, Plus, Minus, Check, X
+- UI components: Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Progress, Switch
+- Use className with Tailwind CSS classes
+
+WORKING CODE EXAMPLE:
+\`\`\`typescript
+const ToolComponent = () => {
+  const [count, setCount] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+
+  const handleStart = () => {
+    setIsActive(true);
+  };
+
+  const handleStop = () => {
+    setIsActive(false);
+  };
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Timer className="h-5 w-5" />
+          Example Tool
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-center">
+          <div className="text-4xl font-bold">{count}</div>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={handleStart} className="flex-1">
+            <Play className="h-4 w-4 mr-2" />
+            Start
+          </Button>
+          <Button onClick={handleStop} variant="outline" className="flex-1">
+            <Pause className="h-4 w-4 mr-2" />
+            Stop
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+\`\`\`
+
+COMMON ERRORS TO AVOID:
+- Using lowercase icon names (play instead of Play)
+- Missing semicolons at line ends
+- Incorrect hook usage or placement
+- Missing closing brackets or parentheses
+- Invalid TypeScript syntax
+- Missing className attributes for styling
+
+RESPONSE FORMAT - Return valid JSON:
 {
-  "toolName": "Short descriptive name for the tool",
-  "features": ["Brief description of feature 1", "Brief description of feature 2"],
-  "implementation": ["A high-level overview of implementation step 1", "Step 2"],
-  "uiComponents": ["UI component used 1", "UI component used 2"],
-  "componentCode": "const ToolComponent = () => { /* The complete, self-contained JSX and logic for the tool. Use hooks like useState and useEffect. Use TailwindCSS for styling and lucide-react for icons. Do not include imports or exports. The component should be a single const, not a default export. */ };"
+  "toolName": "Descriptive tool name",
+  "features": ["Clear feature 1", "Clear feature 2", "Clear feature 3"],
+  "implementation": ["Implementation step 1", "Implementation step 2", "Implementation step 3"],
+  "uiComponents": ["Button", "Card", "Timer"],
+  "componentCode": "const ToolComponent = () => { /* COMPLETE, CLEAN, ERROR-FREE COMPONENT CODE */ };"
 }
 
-Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, and executive-function friendly. Ensure the code is clean, readable, and ready to be dynamically rendered.`;
+Focus on ADHD/Autism accessibility: voice controls, visual feedback, executive function support. Ensure code compiles and runs without errors.`;
 
     const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
 
@@ -73,12 +136,15 @@ Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, a
       const textResponse = data.candidates[0].content.parts[0].text;
       
       const jsonString = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-      const tool = JSON.parse(jsonString) as GeneratedTool;
+      let tool = JSON.parse(jsonString) as GeneratedTool;
 
       // Validate the tool structure
       if (!tool.toolName || !tool.features || !tool.implementation || !tool.uiComponents || !tool.componentCode) {
         throw new Error('Generated tool is missing required fields');
       }
+
+      // Code sanitization and validation
+      tool = sanitizeCode(tool);
 
       setGeneratedTool(tool);
       toast({
@@ -113,4 +179,40 @@ Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, a
   };
 
   return { isProcessing, generatedTool, generateTool };
+};
+
+// Code sanitization function to fix common issues
+const sanitizeCode = (tool: GeneratedTool): GeneratedTool => {
+  let code = tool.componentCode;
+  
+  // Fix common icon naming issues
+  const iconReplacements = {
+    '<play ': '<Play ',
+    '<pause ': '<Pause ',
+    '<timer ': '<Timer ',
+    '<settings ': '<Settings ',
+    '<volume2 ': '<Volume2 ',
+    '<volumex ': '<VolumeX ',
+    '<rotateccw ': '<RotateCcw ',
+    '<plus ': '<Plus ',
+    '<minus ': '<Minus ',
+    '<check ': '<Check ',
+  };
+  
+  Object.entries(iconReplacements).forEach(([wrong, correct]) => {
+    code = code.replace(new RegExp(wrong, 'gi'), correct);
+  });
+  
+  // Ensure proper component structure
+  if (!code.includes('const ToolComponent = ()')) {
+    console.warn('Component structure may be incorrect');
+  }
+  
+  // Add missing semicolons at common locations
+  code = code.replace(/(\w+\))\s*(\n|\r\n)/g, '$1;$2');
+  
+  return {
+    ...tool,
+    componentCode: code
+  };
 };
