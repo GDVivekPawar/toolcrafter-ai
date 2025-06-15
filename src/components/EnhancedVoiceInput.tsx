@@ -23,8 +23,9 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
 }) => {
   const [isListening, setIsListening] = useState(false);
   const [isEnabled, setIsEnabled] = useState(autoStart);
+  const [recognitionState, setRecognitionState] = useState<'idle' | 'starting' | 'listening' | 'stopping'>('idle');
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
   const { speak } = useTextToSpeech();
   const { parseVoiceCommand } = useVoiceCommands();
@@ -38,9 +39,15 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionRef.current = new SpeechRecognition();
     
-    recognitionRef.current.continuous = false; // Changed to false for better control
+    recognitionRef.current.continuous = false;
     recognitionRef.current.interimResults = false;
     recognitionRef.current.lang = 'en-US';
+
+    recognitionRef.current.onstart = () => {
+      console.log('Speech recognition started');
+      setRecognitionState('listening');
+      setIsListening(true);
+    };
 
     recognitionRef.current.onresult = (event) => {
       if (event.results.length > 0) {
@@ -65,35 +72,51 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
 
     recognitionRef.current.onerror = (event) => {
       console.error('Speech recognition error:', event.error);
+      setRecognitionState('idle');
       setIsListening(false);
       
-      // Don't show error toasts for network errors, just retry
-      if (event.error === 'network') {
-        console.log('Network error, will retry listening...');
-        setTimeout(() => {
-          if (isEnabled && recognitionRef.current) {
+      // Clear any pending restart
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
+        restartTimeoutRef.current = null;
+      }
+      
+      // Don't show error toasts for network errors or aborted, just retry
+      if (event.error === 'network' || event.error === 'aborted') {
+        console.log('Network/abort error, will retry listening...');
+        if (isEnabled) {
+          restartTimeoutRef.current = setTimeout(() => {
             startListening();
-          }
-        }, 2000);
+          }, 2000);
+        }
         return;
       }
       
       if (event.error === 'no-speech') {
         // Automatically restart listening after no speech
-        setTimeout(() => {
-          if (isEnabled && recognitionRef.current) {
+        if (isEnabled) {
+          restartTimeoutRef.current = setTimeout(() => {
             startListening();
-          }
-        }, 1000);
+          }, 1000);
+        }
       }
     };
 
     recognitionRef.current.onend = () => {
+      console.log('Speech recognition ended');
+      setRecognitionState('idle');
       setIsListening(false);
-      // Auto-restart if enabled
-      if (isEnabled) {
-        timeoutRef.current = setTimeout(() => {
-          if (isEnabled && recognitionRef.current) {
+      
+      // Clear any pending restart
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
+        restartTimeoutRef.current = null;
+      }
+      
+      // Auto-restart if enabled and not manually stopped
+      if (isEnabled && recognitionState !== 'stopping') {
+        restartTimeoutRef.current = setTimeout(() => {
+          if (isEnabled && recognitionState === 'idle') {
             startListening();
           }
         }, 500);
@@ -107,7 +130,9 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
           speak(welcomeMessage);
         }
         setTimeout(() => {
-          startListening();
+          if (isEnabled) {
+            startListening();
+          }
         }, 3000); // Wait for welcome message to finish
       }, 1000);
     }
@@ -116,30 +141,38 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      if (restartTimeoutRef.current) {
+        clearTimeout(restartTimeoutRef.current);
       }
     };
   }, [onTranscript, onCommand, mode, isEnabled, autoStart, welcomeMessage, parseVoiceCommand, speak]);
 
   const startListening = () => {
-    if (!recognitionRef.current || !isEnabled) return;
+    if (!recognitionRef.current || !isEnabled || recognitionState !== 'idle') {
+      console.log('Cannot start listening:', { hasRecognition: !!recognitionRef.current, isEnabled, recognitionState });
+      return;
+    }
     
     try {
+      setRecognitionState('starting');
       recognitionRef.current.start();
-      setIsListening(true);
+      console.log('Starting speech recognition...');
     } catch (error) {
       console.error('Failed to start recognition:', error);
+      setRecognitionState('idle');
+      setIsListening(false);
     }
   };
 
   const stopListening = () => {
-    if (recognitionRef.current) {
+    if (recognitionRef.current && recognitionState !== 'idle') {
+      setRecognitionState('stopping');
       recognitionRef.current.stop();
     }
     setIsListening(false);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
     }
   };
 
@@ -152,13 +185,15 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
       setIsEnabled(true);
       speak('Voice control enabled. Say help for available commands.');
       setTimeout(() => {
-        startListening();
+        if (recognitionState === 'idle') {
+          startListening();
+        }
       }, 2000);
     }
   };
 
   const announceHelp = () => {
-    speak('Voice commands: Say "help" for instructions, "start timer" for focus session, "add task" for ADHD manager, "routine tracker" for autism support, or describe what you need help with.');
+    speak('Voice commands: Say "help" for instructions, "start timer" for focus session, "memory aid" for reminders, "medication tracker" for pill reminders, "communication practice" for social scripts, "ADHD help" for task management, "autism routine" for structured guidance, or describe what you need help with.');
   };
 
   return (
