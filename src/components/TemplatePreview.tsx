@@ -17,12 +17,26 @@ interface TemplatePreviewProps {
 const getHowToUseText = (templateId: string | undefined): string => {
   if (!templateId) return "No instructions available for this tool.";
   switch (templateId) {
-      case 'focus-timer':
-          return "To use the Focus Timer, first set your desired work duration using the plus and minus one minute buttons. When you are ready, press Start. The timer will count down. You can pause and resume the timer at any time. Press Reset to start over with the default 25 minutes.";
-      case 'medication-reminder':
-          return "To use the Medication Reminder, add a new medication by typing its name, selecting a time, and clicking 'Add Reminder'. Your reminders will appear in the list. When you take your medication, click the 'Take' button to mark it as complete. The button will change to 'Taken'. You can click it again to undo.";
-      default:
-          return "This is an interactive tool. Follow the on-screen instructions to use its features.";
+    case 'focus-timer':
+      return "To use the Focus Timer, first set your desired work duration using the plus and minus one minute buttons. When you are ready, press Start. The timer will count down. You can pause and resume the timer at any time. Press Reset to start over with the default 25 minutes.";
+    case 'medication-reminder':
+      return "To use the Medication Reminder, add a new medication by typing its name, selecting a time, and clicking 'Add Reminder'. Your reminders will appear in the list. When you take your medication, click the 'Take' button to mark it as complete. The button will change to 'Taken'. You can click it again to undo.";
+    case 'daily-planner':
+      return "To use the Daily Planner, type a task in the input box. You can also add a time estimate. Click 'Add Task' to add it to your list. Check the box next to a task to mark it as complete, and use the trash icon to delete it.";
+    case 'environmental-control':
+      return "With the Environmental Control Hub, you can manage your surroundings. Use the large buttons to turn lights, the TV, and the security system on or off. Adjust the temperature, brightness, and audio volume using the sliders.";
+    case 'sensory-break':
+      return "Welcome to your Sensory Break. First, choose an activity like '4-7-8 Breathing' or 'Visual Calm'. If you select the breathing exercise, follow the on-screen prompts to inhale, hold, and exhale. For other activities, follow the simple instructions displayed. You can stop or go back at any time.";
+    case 'memory-palace':
+      return "The Memory Palace helps you follow your daily routine. It shows you one step at a time, like 'Wake Up' or 'Brush Teeth'. Once you've done a step, click 'Mark Complete' to move to the next one. You can also listen to an audio hint for each step. If you need to start over, just press 'Reset Progress'.";
+    case 'reading-assistant':
+      return "To use the Reading Assistant, paste or type your text into the box. You can change the font size, line spacing, and color filter to make it easier to read. Use the 'Start Reading' button to have the text read aloud with highlighting. You can also switch to a dyslexia-friendly font.";
+    case 'communication-board':
+      return "The Communication Board helps you express yourself. Simply click on the pictures or phrases that represent what you want to say. The tool will speak your selection aloud.";
+    case 'seizure-alert':
+      return "The Seizure Alert tool is for your safety. If you feel a seizure coming on, or if you need help, press the large 'Send Alert' button. This will immediately notify your pre-selected contacts or emergency services.";
+    default:
+      return "This is an interactive tool. Follow the on-screen instructions to use its features.";
   }
 }
 

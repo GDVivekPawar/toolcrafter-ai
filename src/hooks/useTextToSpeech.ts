@@ -1,18 +1,11 @@
-
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 
 export const useTextToSpeech = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const { toast } = useToast();
 
   const speak = (text: string) => {
     if (!('speechSynthesis' in window)) {
-      toast({
-        title: "Text-to-Speech Not Supported",
-        description: "Your browser doesn't support text-to-speech functionality.",
-        variant: "destructive"
-      });
+      console.error("Text-to-Speech Not Supported: Your browser doesn't support this feature.");
       return;
     }
 
