@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Mic, MicOff, Send, Sparkles, Zap, Brain, Calendar, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, Card-Content, Card-Header, Card-Title } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import VoiceInput from '@/components/VoiceInput';
@@ -82,13 +82,13 @@ const Index = () => {
           {/* Input Section */}
           <div className="lg:col-span-2 space-y-6">
             <Card className="border-blue-200 shadow-lg">
-              <Card-Header className="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-t-lg">
-                <Card-Title className="flex items-center space-x-2">
+              <CardHeader className="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center space-x-2">
                   <Brain className="h-5 w-5" />
                   <span>Describe Your Accessibility Need</span>
-                </Card-Title>
-              </Card-Header>
-              <Card-Content className="p-6 space-y-4">
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
                 <div className="space-y-4">
                   <Textarea
                     placeholder="Example: Create a voice-controlled daily planner for ADHD that breaks tasks into small steps and provides audio reminders..."
@@ -125,7 +125,7 @@ const Index = () => {
                     </Button>
                   </div>
                 </div>
-              </Card-Content>
+              </CardContent>
             </Card>
 
             {/* Template Gallery */}
@@ -143,10 +143,10 @@ const Index = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             <Card className="border-green-200 shadow-lg">
-              <Card-Header className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-                <Card-Title className="text-lg">Quick Templates</Card-Title>
-              </Card-Header>
-              <Card-Content className="p-4 space-y-3">
+              <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
+                <CardTitle className="text-lg">Quick Templates</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 space-y-3">
                 {[
                   { icon: Calendar, text: "Daily Planner", color: "blue" },
                   { icon: Timer, text: "Focus Timer", color: "green" },
@@ -162,19 +162,19 @@ const Index = () => {
                     {template.text}
                   </Button>
                 ))}
-              </Card-Content>
+              </CardContent>
             </Card>
 
             <Card className="border-yellow-200 bg-yellow-50">
-              <Card-Header>
-                <Card-Title className="text-lg text-yellow-800">Tips for Better Results</Card-Title>
-              </Card-Header>
-              <Card-Content className="p-4 text-sm text-yellow-700 space-y-2">
+              <CardHeader>
+                <CardTitle className="text-lg text-yellow-800">Tips for Better Results</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 text-sm text-yellow-700 space-y-2">
                 <p>• Be specific about your needs and challenges</p>
                 <p>• Mention any sensory preferences</p>
                 <p>• Include your daily routine context</p>
                 <p>• Specify accessibility requirements</p>
-              </Card-Content>
+              </CardContent>
             </Card>
           </div>
         </div>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, Card-Content, Card-Header, Card-Title } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Timer, Brain, CheckSquare, Bell, Headphones, Heart, Zap } from 'lucide-react';
 
@@ -56,13 +56,13 @@ const templates = [
 const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) => {
   return (
     <Card className="border-purple-200 shadow-lg">
-      <Card-Header className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
-        <Card-Title className="flex items-center space-x-2">
+      <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+        <CardTitle className="flex items-center space-x-2">
           <Zap className="h-5 w-5" />
           <span>Accessibility Tool Templates</span>
-        </Card-Title>
-      </Card-Header>
-      <Card-Content className="p-6">
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {templates.map((template, index) => (
             <div
@@ -93,7 +93,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
             </div>
           ))}
         </div>
-      </Card-Content>
+      </CardContent>
     </Card>
   );
 };

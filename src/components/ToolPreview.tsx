@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, Card-Content, Card-Header, Card-Title } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, Download, Share, Code } from 'lucide-react';
 
@@ -13,13 +13,13 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
   if (isProcessing) {
     return (
       <Card className="border-green-200 shadow-lg">
-        <Card-Header className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-          <Card-Title className="flex items-center space-x-2">
+        <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
+          <CardTitle className="flex items-center space-x-2">
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
             <span>Generating Your Accessibility Tool...</span>
-          </Card-Title>
-        </Card-Header>
-        <Card-Content className="p-6">
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
           <div className="space-y-4">
             <div className="animate-pulse space-y-3">
               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -31,7 +31,7 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
               </div>
             </div>
           </div>
-        </Card-Content>
+        </CardContent>
       </Card>
     );
   }
@@ -53,13 +53,13 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
 
   return (
     <Card className="border-green-200 shadow-lg">
-      <Card-Header className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-        <Card-Title className="flex items-center space-x-2">
+      <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
+        <CardTitle className="flex items-center space-x-2">
           <Eye className="h-5 w-5" />
           <span>Generated Tool Preview</span>
-        </Card-Title>
-      </Card-Header>
-      <Card-Content className="p-6 space-y-6">
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6 space-y-6">
         <div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">{mockTool.title}</h3>
           <p className="text-gray-600 mb-4">{mockTool.description}</p>
@@ -112,7 +112,7 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
             View Code
           </Button>
         </div>
-      </Card-Content>
+      </CardContent>
     </Card>
   );
 };
