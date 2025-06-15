@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
-import { Mic, MicOff, Send, Sparkles, Zap, Brain, Calendar, Timer } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { Send, Sparkles, Zap, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import VoiceInput from '@/components/VoiceInput';
-import ToolPreview from '@/components/ToolPreview';
 import TemplateGallery from '@/components/TemplateGallery';
 import TemplatePreview from '@/components/TemplatePreview';
-import { useGemini } from '@/hooks/useGemini';
 import HighContrastToggle from '@/components/HighContrastToggle';
 import Footer from '@/components/Footer';
 import { useTemplateEngine } from '@/hooks/useTemplateEngine';
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 import EnhancedVoiceInput from '@/components/EnhancedVoiceInput';
 
 const Index = () => {
   const [prompt, setPrompt] = useState('');
-  const [isListening, setIsListening] = useState(false);
   
   const {
     selectedTemplate,
@@ -28,20 +26,30 @@ const Index = () => {
     getAvailableTemplates
   } = useTemplateEngine();
 
+  const { scrollToTool, scrollToSection } = useAutoScroll();
+
+  // Auto-scroll when a tool is ready
+  useEffect(() => {
+    if (selectedTemplate && !isProcessing) {
+      setTimeout(() => {
+        scrollToTool(true);
+      }, 500);
+    }
+  }, [selectedTemplate, isProcessing, scrollToTool]);
+
   const handleVoiceInput = (transcript: string) => {
     setPrompt(transcript);
   };
 
   const handleVoiceCommand = (command: string) => {
-    // Handle voice commands for navigation
     const lowerCommand = command.toLowerCase();
     
     if (lowerCommand.includes('show tools') || lowerCommand.includes('what tools')) {
-      document.querySelector('[aria-label="Available tools"]')?.scrollIntoView({ behavior: 'smooth' });
+      scrollToSection('Available tools');
       return;
     }
     
-    if (lowerCommand.includes('start timer')) {
+    if (lowerCommand.includes('start timer') || lowerCommand.includes('focus timer')) {
       const timerTemplate = getAvailableTemplates().find(t => t.id === 'focus-timer');
       if (timerTemplate) {
         selectTemplate(timerTemplate);
@@ -61,6 +69,30 @@ const Index = () => {
       const routineTemplate = getAvailableTemplates().find(t => t.id === 'autism-routine-tracker');
       if (routineTemplate) {
         selectTemplate(routineTemplate);
+      }
+      return;
+    }
+
+    if (lowerCommand.includes('memory') || lowerCommand.includes('reminder')) {
+      const memoryTemplate = getAvailableTemplates().find(t => t.id === 'memory-aid-tool');
+      if (memoryTemplate) {
+        selectTemplate(memoryTemplate);
+      }
+      return;
+    }
+
+    if (lowerCommand.includes('medication') || lowerCommand.includes('pills')) {
+      const medicationTemplate = getAvailableTemplates().find(t => t.id === 'medication-tracker');
+      if (medicationTemplate) {
+        selectTemplate(medicationTemplate);
+      }
+      return;
+    }
+
+    if (lowerCommand.includes('communication') || lowerCommand.includes('social')) {
+      const commTemplate = getAvailableTemplates().find(t => t.id === 'communication-helper');
+      if (commTemplate) {
+        selectTemplate(commTemplate);
       }
       return;
     }
@@ -96,7 +128,7 @@ const Index = () => {
             <div className="flex items-center space-x-4">
               <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
                 <Zap className="h-4 w-4 text-yellow-500" />
-                <span>Powered by Google Gemini</span>
+                <span>Voice-First AI Tools</span>
               </div>
               <HighContrastToggle />
             </div>
@@ -105,7 +137,6 @@ const Index = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Skip link for keyboard navigation */}
         <a 
           href="#main-content" 
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50"
@@ -126,7 +157,7 @@ const Index = () => {
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-4">
                   <Textarea
-                    placeholder="Try: 'I need help with ADHD task management' or 'Help me with daily routines for autism'"
+                    placeholder="Try: 'I need help with ADHD task management', 'medication reminders', 'communication practice', or 'memory assistance'"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="min-h-[120px] text-lg border-blue-200 focus:border-blue-400 focus:ring-blue-400"
@@ -138,8 +169,8 @@ const Index = () => {
                       onTranscript={handleVoiceInput}
                       onCommand={handleVoiceCommand}
                       mode="both"
-                      continuousListening={false}
-                      welcomeMessage="Voice control ready. Say 'help' for commands, or describe what you need."
+                      autoStart={true}
+                      welcomeMessage="Welcome to AccessiGen! Voice control is active. Say 'help' for commands, or describe what accessibility tool you need. You can also say 'memory help', 'medication tracker', 'communication practice', or 'ADHD support'."
                     />
                     
                     <Button 
@@ -167,7 +198,7 @@ const Index = () => {
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                       <p>{error}</p>
                       <p className="text-sm mt-2">
-                        Try: "ADHD task help", "autism routine", "focus timer", "sensory break", "daily planner"
+                        Try: "ADHD help", "medication tracker", "memory aid", "communication practice", "focus timer"
                       </p>
                     </div>
                   )}
@@ -175,10 +206,8 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            {/* Template Gallery */}
             <TemplateGallery onTemplateSelect={handleTemplateSelect} />
 
-            {/* Template Preview */}
             {(selectedTemplate || isProcessing) && (
               <TemplatePreview 
                 template={selectedTemplate}
@@ -193,10 +222,10 @@ const Index = () => {
           <div className="space-y-6">
             <Card className="border-green-200 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-                <CardTitle className="text-lg">Accessibility Tools</CardTitle>
+                <CardTitle className="text-lg">Popular Accessibility Tools</CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-3" aria-label="Available tools">
-                {availableTemplates.slice(0, 5).map((template) => (
+                {availableTemplates.slice(0, 6).map((template) => (
                   <Button
                     key={template.id}
                     variant="outline"
@@ -218,11 +247,13 @@ const Index = () => {
               </CardHeader>
               <CardContent className="p-4 text-sm text-purple-700 space-y-2">
                 <ul className="space-y-1">
-                  <li>• "Start timer" - Quick focus session</li>
                   <li>• "ADHD help" - Task management</li>
-                  <li>• "Routine tracker" - Structured guidance</li>
-                  <li>• "Sensory break" - Calming exercises</li>
-                  <li>• "Help" - Available commands</li>
+                  <li>• "Memory aid" - Reminders & notes</li>
+                  <li>• "Medication tracker" - Pill reminders</li>
+                  <li>• "Communication practice" - Social scripts</li>
+                  <li>• "Autism routine" - Structured guidance</li>
+                  <li>• "Start timer" - Focus session</li>
+                  <li>• "Help" - All commands</li>
                 </ul>
               </CardContent>
             </Card>
