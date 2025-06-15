@@ -3,6 +3,8 @@ import { ToolTemplate, TemplateMatch } from '@/types/template';
 import FocusTimer from '@/templates/FocusTimer';
 import DailyPlanner from '@/templates/DailyPlanner';
 import SensoryBreak from '@/templates/SensoryBreak';
+import ADHDTaskManager from '@/templates/ADHDTaskManager';
+import AutismRoutineTracker from '@/templates/AutismRoutineTracker';
 
 export const availableTemplates: ToolTemplate[] = [
   {
@@ -49,6 +51,40 @@ export const availableTemplates: ToolTemplate[] = [
       'Multiple sensory activities',
       'Audio guidance',
       'Visual breathing cues',
+      'Progress tracking'
+    ],
+    difficulty: 'intermediate'
+  },
+  {
+    id: 'adhd-task-manager',
+    name: 'ADHD Task Manager',
+    description: 'Voice-controlled task manager with timeboxing and rewards for ADHD users',
+    category: 'focus',
+    keywords: ['adhd', 'task', 'timeboxing', 'reward', 'voice', 'executive function', 'dopamine', 'motivation', 'focus'],
+    component: ADHDTaskManager,
+    features: [
+      'Voice-controlled task management',
+      'Automatic timeboxing',
+      'Built-in reward system',
+      'Difficulty estimation',
+      'Focus mode with timer',
+      'Encouraging audio feedback'
+    ],
+    difficulty: 'intermediate'
+  },
+  {
+    id: 'autism-routine-tracker',
+    name: 'Autism Routine Tracker',
+    description: 'Structured routine guidance with visual cues and audio support for autism',
+    category: 'communication',
+    keywords: ['autism', 'routine', 'structure', 'visual', 'predictable', 'steps', 'transition', 'schedule'],
+    component: AutismRoutineTracker,
+    features: [
+      'Visual cue system',
+      'Step-by-step guidance',
+      'Audio instructions',
+      'Predictable structure',
+      'Multiple routine types',
       'Progress tracking'
     ],
     difficulty: 'intermediate'

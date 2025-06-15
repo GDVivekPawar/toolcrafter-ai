@@ -11,6 +11,7 @@ import { useGemini } from '@/hooks/useGemini';
 import HighContrastToggle from '@/components/HighContrastToggle';
 import Footer from '@/components/Footer';
 import { useTemplateEngine } from '@/hooks/useTemplateEngine';
+import EnhancedVoiceInput from '@/components/EnhancedVoiceInput';
 
 const Index = () => {
   const [prompt, setPrompt] = useState('');
@@ -29,6 +30,40 @@ const Index = () => {
 
   const handleVoiceInput = (transcript: string) => {
     setPrompt(transcript);
+  };
+
+  const handleVoiceCommand = (command: string) => {
+    // Handle voice commands for navigation
+    const lowerCommand = command.toLowerCase();
+    
+    if (lowerCommand.includes('show tools') || lowerCommand.includes('what tools')) {
+      document.querySelector('[aria-label="Available tools"]')?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    
+    if (lowerCommand.includes('start timer')) {
+      const timerTemplate = getAvailableTemplates().find(t => t.id === 'focus-timer');
+      if (timerTemplate) {
+        selectTemplate(timerTemplate);
+      }
+      return;
+    }
+    
+    if (lowerCommand.includes('adhd') || lowerCommand.includes('task manager')) {
+      const adhdTemplate = getAvailableTemplates().find(t => t.id === 'adhd-task-manager');
+      if (adhdTemplate) {
+        selectTemplate(adhdTemplate);
+      }
+      return;
+    }
+    
+    if (lowerCommand.includes('routine') || lowerCommand.includes('autism')) {
+      const routineTemplate = getAvailableTemplates().find(t => t.id === 'autism-routine-tracker');
+      if (routineTemplate) {
+        selectTemplate(routineTemplate);
+      }
+      return;
+    }
   };
 
   const handleTemplateSelect = (template: string) => {
@@ -85,13 +120,13 @@ const Index = () => {
               <CardHeader className="bg-gradient-to-r from-blue-500 to-green-500 text-white rounded-t-lg">
                 <CardTitle className="flex items-center space-x-2">
                   <Brain className="h-5 w-5" />
-                  <span>Describe Your Accessibility Need</span>
+                  <span>Voice-First Accessibility Tools</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-4">
                   <Textarea
-                    placeholder="Example: I need a timer for focus sessions, or help me plan my daily tasks..."
+                    placeholder="Try: 'I need help with ADHD task management' or 'Help me with daily routines for autism'"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     className="min-h-[120px] text-lg border-blue-200 focus:border-blue-400 focus:ring-blue-400"
@@ -99,10 +134,12 @@ const Index = () => {
                   />
                   
                   <div className="flex flex-col sm:flex-row gap-3">
-                    <VoiceInput 
+                    <EnhancedVoiceInput 
                       onTranscript={handleVoiceInput}
-                      isListening={isListening}
-                      setIsListening={setIsListening}
+                      onCommand={handleVoiceCommand}
+                      mode="both"
+                      continuousListening={false}
+                      welcomeMessage="Voice control ready. Say 'help' for commands, or describe what you need."
                     />
                     
                     <Button 
@@ -130,7 +167,7 @@ const Index = () => {
                     <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
                       <p>{error}</p>
                       <p className="text-sm mt-2">
-                        Try keywords like: "timer", "planner", "daily tasks", "focus", "breathing", "sensory break"
+                        Try: "ADHD task help", "autism routine", "focus timer", "sensory break", "daily planner"
                       </p>
                     </div>
                   )}
@@ -156,10 +193,10 @@ const Index = () => {
           <div className="space-y-6">
             <Card className="border-green-200 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-t-lg">
-                <CardTitle className="text-lg">Available Tools</CardTitle>
+                <CardTitle className="text-lg">Accessibility Tools</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 space-y-3">
-                {availableTemplates.slice(0, 3).map((template) => (
+              <CardContent className="p-4 space-y-3" aria-label="Available tools">
+                {availableTemplates.slice(0, 5).map((template) => (
                   <Button
                     key={template.id}
                     variant="outline"
@@ -175,16 +212,17 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card className="border-yellow-200 bg-yellow-50">
+            <Card className="border-purple-200 bg-purple-50">
               <CardHeader>
-                <CardTitle className="text-lg text-yellow-800">How It Works</CardTitle>
+                <CardTitle className="text-lg text-purple-800">Voice Commands</CardTitle>
               </CardHeader>
-              <CardContent className="p-4 text-sm text-yellow-700 space-y-2">
+              <CardContent className="p-4 text-sm text-purple-700 space-y-2">
                 <ul className="space-y-1">
-                  <li>• Describe what you need in simple terms</li>
-                  <li>• We'll match you with the perfect tool</li>
-                  <li>• Use it immediately - no setup required</li>
-                  <li>• All tools are fully accessible</li>
+                  <li>• "Start timer" - Quick focus session</li>
+                  <li>• "ADHD help" - Task management</li>
+                  <li>• "Routine tracker" - Structured guidance</li>
+                  <li>• "Sensory break" - Calming exercises</li>
+                  <li>• "Help" - Available commands</li>
                 </ul>
               </CardContent>
             </Card>
