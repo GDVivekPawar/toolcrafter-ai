@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ const TemplatePreview: React.FC<TemplatePreviewProps> = ({
   onReset 
 }) => {
   const { speak, stopSpeaking, isSpeaking } = useTextToSpeech();
-  const { announceToolReady } = useVoiceGuide();
+  const { announceToolReady } = useVoiceGuide({ disableWelcome: true });
   const [showLivePreview, setShowLivePreview] = useState(false);
   const [hasAnnouncedReady, setHasAnnouncedReady] = useState(false);
 

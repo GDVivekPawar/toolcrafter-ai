@@ -1,4 +1,3 @@
-
 import { ToolTemplate } from '@/types/template';
 
 export const deployTool = (template: ToolTemplate): void => {
@@ -227,7 +226,96 @@ const getComponentCode = (templateId: string): string => {
           );
         };
       `;
-    
+    case 'medication-reminder':
+      return `
+        const ToolComponent = () => {
+          const [meds, setMeds] = useState([
+            { id: 1, name: 'Aspirin', time: '08:00 AM', taken: false },
+            { id: 2, name: 'Vitamin D', time: '08:00 AM', taken: true },
+            { id: 3, name: 'Metformin', time: '06:00 PM', taken: false },
+          ]);
+          const [newMedName, setNewMedName] = useState('');
+          const [newMedTime, setNewMedTime] = useState('09:00');
+
+          const addMed = () => {
+            if (!newMedName.trim() || !newMedTime) return;
+            const newMed = {
+              id: Date.now(),
+              name: newMedName.trim(),
+              time: new Date('1970-01-01T' + newMedTime + ':00').toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+              taken: false,
+            };
+            setMeds([...meds, newMed]);
+            setNewMedName('');
+            setNewMedTime('09:00');
+          };
+
+          const toggleTaken = (id) => {
+            setMeds(meds.map(med => med.id === id ? { ...med, taken: !med.taken } : med));
+          };
+          
+          const medItemStyle = {
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px',
+            borderBottom: '1px solid #eee'
+          };
+          
+          const takenStyle = {
+            textDecoration: 'line-through',
+            color: '#9ca3af'
+          };
+
+          return (
+            <div className="space-y-4">
+              <div className="card space-y-2">
+                <h3 style={{fontWeight: 600}}>Add New Medication</h3>
+                <input 
+                  type="text" 
+                  placeholder="Medication Name" 
+                  value={newMedName} 
+                  onChange={(e) => setNewMedName(e.target.value)} 
+                  style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginBottom: '8px'}}
+                />
+                <input 
+                  type="time" 
+                  value={newMedTime} 
+                  onChange={(e) => setNewMedTime(e.target.value)}
+                  style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', marginBottom: '8px'}}
+                />
+                <button className="btn" onClick={addMed}>Add Reminder</button>
+              </div>
+              <div className="card">
+                <h3 style={{fontWeight: 600, marginBottom: '1rem'}}>Today's Reminders</h3>
+                <div>
+                  {meds.length === 0 ? (
+                    <p style={{color: '#6b7280'}}>No medication reminders set.</p>
+                  ) : meds.map(med => (
+                    <div key={med.id} style={medItemStyle}>
+                      <div style={med.taken ? takenStyle : {}}>
+                        <p style={{fontWeight: 500, margin: 0}}>{med.name}</p>
+                        <p style={{fontSize: '0.875rem', color: '#6b7280', margin: 0}}>{med.time}</p>
+                      </div>
+                      <button 
+                        className="btn" 
+                        onClick={() => toggleTaken(med.id)}
+                        style={{
+                          background: med.taken ? '#10b981' : '#3b82f6',
+                          fontSize: '0.875rem',
+                          padding: '8px 16px'
+                        }}
+                      >
+                        {med.taken ? 'Taken' : 'Take'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        };
+      `;
     default:
       return `
         const ToolComponent = () => {

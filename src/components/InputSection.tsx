@@ -1,10 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Send, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import VoiceInput from '@/components/VoiceInput';
 
 interface InputSectionProps {
   prompt: string;
@@ -12,7 +11,6 @@ interface InputSectionProps {
   isProcessing: boolean;
   error: string | null;
   onGenerateTool: () => void;
-  onVoiceInput: (transcript: string) => void;
 }
 
 const InputSection: React.FC<InputSectionProps> = ({
@@ -21,10 +19,7 @@ const InputSection: React.FC<InputSectionProps> = ({
   isProcessing,
   error,
   onGenerateTool,
-  onVoiceInput
 }) => {
-  const [isListening, setIsListening] = useState(false);
-
   return (
     <Card className="border-gray-700/40 shadow-2xl bg-gray-800/90 backdrop-blur-xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-blue-500 via-purple-600 to-green-500 text-white">
@@ -44,16 +39,10 @@ const InputSection: React.FC<InputSectionProps> = ({
           />
           
           <div className="flex flex-col sm:flex-row gap-4">
-            <VoiceInput 
-              onTranscript={onVoiceInput}
-              isListening={isListening}
-              setIsListening={setIsListening}
-            />
-            
             <Button 
               onClick={onGenerateTool}
               disabled={isProcessing || !prompt.trim()}
-              className="bg-gradient-to-r from-blue-500 via-purple-600 to-green-500 hover:from-blue-600 hover:via-purple-700 hover:to-green-600 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+              className="bg-gradient-to-r from-blue-500 via-purple-600 to-green-500 hover:from-blue-600 hover:via-purple-700 hover:to-green-600 text-white px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl w-full"
               size="lg"
               aria-label="Find matching accessibility tool"
             >

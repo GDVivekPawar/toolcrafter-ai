@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import TemplateGallery from '@/components/TemplateGallery';
 import TemplatePreview from '@/components/TemplatePreview';
 import Footer from '@/components/Footer';
 import Header from '@/components/Header';
@@ -28,16 +27,6 @@ const Index = () => {
   // Initialize voice guide
   useVoiceGuide();
 
-  const handleVoiceInput = (transcript: string) => {
-    setPrompt(transcript);
-  };
-
-  const handleTemplateSelect = (templatePrompt: string) => {
-    setPrompt(templatePrompt);
-    // Automatically process the template prompt
-    processPrompt(templatePrompt);
-  };
-
   const handleGenerateTool = () => {
     if (prompt.trim()) {
       processPrompt(prompt);
@@ -62,11 +51,7 @@ const Index = () => {
               isProcessing={isProcessing}
               error={error}
               onGenerateTool={handleGenerateTool}
-              onVoiceInput={handleVoiceInput}
             />
-
-            {/* Template Gallery */}
-            <TemplateGallery onTemplateSelect={handleTemplateSelect} />
 
             {/* Template Preview */}
             {(selectedTemplate || isProcessing) && (

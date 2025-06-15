@@ -1,7 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
 
-export const useVoiceGuide = () => {
+interface VoiceGuideOptions {
+  disableWelcome?: boolean;
+}
+
+export const useVoiceGuide = (options: VoiceGuideOptions = {}) => {
+  const { disableWelcome = false } = options;
   const { speak } = useTextToSpeech();
   const hasWelcomed = useRef(false);
 
@@ -36,10 +41,11 @@ export const useVoiceGuide = () => {
   };
 
   useEffect(() => {
+    if (disableWelcome) return;
     // Welcome user when component mounts
     const timer = setTimeout(welcomeUser, 1000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [disableWelcome]);
 
   return {
     welcomeUser,
