@@ -20,26 +20,24 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       recognitionRef.current = new SpeechRecognition();
       
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+      recognitionRef.current.continuous = false; // Changed to false to prevent conflicts
+      recognitionRef.current.interimResults = false; // Changed to false for cleaner results
       recognitionRef.current.lang = 'en-US';
 
       recognitionRef.current.onstart = () => {
         setHasError(false);
         console.log('Voice recognition started');
+        // Stop any ongoing speech synthesis to prevent conflicts
+        if ('speechSynthesis' in window && speechSynthesis.speaking) {
+          speechSynthesis.cancel();
+        }
       };
 
       recognitionRef.current.onresult = (event) => {
-        let finalTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
-          }
-        }
-        if (finalTranscript) {
-          console.log('Voice input received:', finalTranscript);
-          onTranscript(finalTranscript);
-        }
+        const transcript = event.results[0][0].transcript;
+        console.log('Voice input received:', transcript);
+        onTranscript(transcript);
+        setIsListening(false); // Auto-stop after getting result
       };
 
       recognitionRef.current.onerror = (event) => {
@@ -47,19 +45,20 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
         setHasError(true);
         setIsListening(false);
         
-        // Handle different error types without auto-retry
+        // Handle different error types with reduced noise
+        if (event.error === 'no-speech') {
+          // Don't show toast for no speech - just silently stop
+          return;
+        }
+        
         let errorMessage = "Voice input error occurred.";
         let description = "Please try again.";
         
         switch (event.error) {
           case 'network':
             errorMessage = "Network Error";
-            description = "Check your internet connection and try again manually.";
+            description = "Check your internet connection and try again.";
             break;
-          case 'no-speech':
-            errorMessage = "No Speech Detected";
-            description = "Please speak clearly and try again.";
-            return; // Don't show toast for no speech
           case 'audio-capture':
             errorMessage = "Microphone Access Error";
             description = "Please check your microphone permissions.";
@@ -72,9 +71,6 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
             errorMessage = "Voice Service Unavailable";
             description = "Voice recognition service is not available.";
             break;
-          default:
-            errorMessage = "Voice Input Error";
-            description = `Error type: ${event.error}. Please try again.`;
         }
         
         toast({
@@ -102,6 +98,11 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, isListening, setI
     if (!recognitionRef.current) return;
     
     try {
+      // Stop any ongoing speech before starting recognition
+      if ('speechSynthesis' in window && speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+      
       setHasError(false);
       recognitionRef.current.start();
       setIsListening(true);
