@@ -32,8 +32,10 @@ const Index = () => {
     setPrompt(transcript);
   };
 
-  const handleTemplateSelect = (template: string) => {
-    setPrompt(template);
+  const handleTemplateSelect = (templatePrompt: string) => {
+    setPrompt(templatePrompt);
+    // Automatically process the template prompt
+    processPrompt(templatePrompt);
   };
 
   const handleGenerateTool = () => {
@@ -45,16 +47,27 @@ const Index = () => {
   const availableTemplates = getAvailableTemplates();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-green-50 relative overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gray-900 relative overflow-hidden">
+      {/* Animated Background Elements with AI-style patterns */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse-gentle"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl animate-pulse-gentle" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full blur-3xl animate-pulse-gentle" style={{ animationDelay: '2s' }}></div>
+        {/* Geometric patterns */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute top-20 left-20 w-32 h-32 border border-blue-400/30 rounded-lg rotate-45 animate-pulse-gentle"></div>
+          <div className="absolute top-40 right-32 w-24 h-24 border border-purple-400/30 rounded-lg rotate-12 animate-pulse-gentle" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-32 left-16 w-40 h-40 border border-green-400/30 rounded-lg -rotate-12 animate-pulse-gentle" style={{ animationDelay: '2s' }}></div>
+        </div>
+        
+        {/* Gradient orbs */}
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse-gentle"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse-gentle" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-br from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse-gentle" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
       </div>
 
-      {/* Modern Header */}
-      <header className="bg-white/90 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50 shadow-lg">
+      {/* Modern Header with glassmorphism */}
+      <header className="bg-gray-800/80 backdrop-blur-xl border-b border-gray-700/50 sticky top-0 z-50 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -65,15 +78,15 @@ const Index = () => {
                 </div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                   ToolCrafter.Ai
                 </h1>
-                <p className="text-sm text-gray-600 font-medium">Revolutionary AI-Powered Accessibility</p>
+                <p className="text-sm text-gray-400 font-medium">Revolutionary AI-Powered Accessibility</p>
               </div>
             </div>
             <div className="flex items-center space-x-6">
-              <div className="hidden sm:flex items-center space-x-3 text-sm text-gray-600 bg-white/60 rounded-full px-4 py-2 backdrop-blur-sm">
-                <Zap className="h-4 w-4 text-yellow-500" />
+              <div className="hidden sm:flex items-center space-x-3 text-sm text-gray-300 bg-gray-800/60 rounded-full px-4 py-2 backdrop-blur-sm border border-gray-700/50">
+                <Zap className="h-4 w-4 text-yellow-400" />
                 <span className="font-medium">Powered by Advanced AI</span>
               </div>
               <HighContrastToggle />
@@ -82,30 +95,30 @@ const Index = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
+      {/* Hero Section with dark theme */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-8">
-            <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 bg-clip-text text-transparent leading-tight">
+            <h2 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-green-400 bg-clip-text text-transparent leading-tight">
               Accessibility
               <br />
               <span className="text-4xl md:text-6xl">Reimagined</span>
             </h2>
-            <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
               Discover powerful, AI-driven accessibility tools designed for real-world impact. 
               From reading assistance to emergency systems, we're building the future of inclusive technology.
             </p>
           </div>
           
           <div className="flex flex-wrap justify-center gap-4 mb-12">
-            <div className="bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 border border-white/40 shadow-lg">
-              <span className="text-blue-600 font-semibold">✨ AI-Powered</span>
+            <div className="bg-gray-800/70 backdrop-blur-sm rounded-full px-6 py-3 border border-gray-700/40 shadow-lg">
+              <span className="text-blue-400 font-semibold">✨ AI-Powered</span>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 border border-white/40 shadow-lg">
-              <span className="text-purple-600 font-semibold">🎯 Real-World Tools</span>
+            <div className="bg-gray-800/70 backdrop-blur-sm rounded-full px-6 py-3 border border-gray-700/40 shadow-lg">
+              <span className="text-purple-400 font-semibold">🎯 Real-World Tools</span>
             </div>
-            <div className="bg-white/70 backdrop-blur-sm rounded-full px-6 py-3 border border-white/40 shadow-lg">
-              <span className="text-green-600 font-semibold">♿ Accessibility First</span>
+            <div className="bg-gray-800/70 backdrop-blur-sm rounded-full px-6 py-3 border border-gray-700/40 shadow-lg">
+              <span className="text-green-400 font-semibold">♿ Accessibility First</span>
             </div>
           </div>
         </div>
@@ -115,7 +128,7 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Input Section */}
           <div className="lg:col-span-2 space-y-8">
-            <Card className="border-white/40 shadow-xl bg-white/90 backdrop-blur-xl overflow-hidden">
+            <Card className="border-gray-700/40 shadow-2xl bg-gray-800/90 backdrop-blur-xl overflow-hidden">
               <CardHeader className="bg-gradient-to-r from-blue-500 via-purple-600 to-green-500 text-white">
                 <CardTitle className="flex items-center space-x-3 text-xl">
                   <Brain className="h-6 w-6" />
@@ -128,7 +141,7 @@ const Index = () => {
                     placeholder="Try: 'I need help reading text on my screen' or 'Create a medication reminder system' or 'I want to control my smart home with voice commands'..."
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    className="min-h-[140px] text-lg border-white/60 bg-white/50 backdrop-blur-sm focus:border-purple-400 focus:ring-purple-400 rounded-xl resize-none"
+                    className="min-h-[140px] text-lg border-gray-600/60 bg-gray-700/50 backdrop-blur-sm focus:border-purple-400 focus:ring-purple-400 rounded-xl resize-none text-white placeholder:text-gray-400"
                     aria-label="Describe the accessibility tool you need"
                   />
                   
@@ -161,9 +174,9 @@ const Index = () => {
                   </div>
 
                   {error && (
-                    <div className="p-6 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-xl text-red-700">
+                    <div className="p-6 bg-red-900/50 backdrop-blur-sm border border-red-700/60 rounded-xl text-red-300">
                       <p className="font-medium">{error}</p>
-                      <p className="text-sm mt-2">
+                      <p className="text-sm mt-2 text-red-400">
                         Try describing tools like: "reading assistant", "medication reminder", "communication board", "smart home control"
                       </p>
                     </div>
@@ -186,9 +199,9 @@ const Index = () => {
             )}
           </div>
 
-          {/* Enhanced Sidebar */}
+          {/* Enhanced Sidebar with dark theme */}
           <div className="space-y-8">
-            <Card className="border-white/40 shadow-xl bg-gradient-to-br from-green-50/90 to-blue-50/90 backdrop-blur-xl">
+            <Card className="border-gray-700/40 shadow-2xl bg-gradient-to-br from-green-900/50 to-blue-900/50 backdrop-blur-xl">
               <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
                 <CardTitle className="text-lg flex items-center space-x-2">
                   <Zap className="h-5 w-5" />
@@ -200,41 +213,41 @@ const Index = () => {
                   <Button
                     key={template.id}
                     variant="outline"
-                    className="w-full justify-start border-white/60 bg-white/70 hover:bg-white/90 h-auto py-4 px-4 backdrop-blur-sm transition-all duration-300 hover:shadow-lg rounded-xl"
+                    className="w-full justify-start border-gray-600/60 bg-gray-800/70 hover:bg-gray-700/90 h-auto py-4 px-4 backdrop-blur-sm transition-all duration-300 hover:shadow-lg rounded-xl text-gray-200 hover:text-white"
                     onClick={() => selectTemplate(template)}
                   >
                     <div className="text-left">
-                      <div className="font-semibold text-sm text-gray-900">{template.name}</div>
-                      <div className="text-xs text-gray-600 mt-1 line-clamp-2">{template.description}</div>
+                      <div className="font-semibold text-sm text-gray-200">{template.name}</div>
+                      <div className="text-xs text-gray-400 mt-1 line-clamp-2">{template.description}</div>
                     </div>
                   </Button>
                 ))}
               </CardContent>
             </Card>
 
-            <Card className="border-white/40 shadow-xl bg-gradient-to-br from-yellow-50/90 to-orange-50/90 backdrop-blur-xl">
+            <Card className="border-gray-700/40 shadow-2xl bg-gradient-to-br from-yellow-900/50 to-orange-900/50 backdrop-blur-xl">
               <CardHeader>
-                <CardTitle className="text-lg text-orange-800 flex items-center space-x-2">
+                <CardTitle className="text-lg text-orange-300 flex items-center space-x-2">
                   <Heart className="h-5 w-5" />
-                  <span>Why AccessiGen?</span>
+                  <span>Why ToolCrafter.Ai?</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 text-sm text-orange-700 space-y-3">
+              <CardContent className="p-6 text-sm text-orange-200 space-y-3">
                 <ul className="space-y-2">
                   <li className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
                     <span>AI understands your unique needs</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
                     <span>Instantly deployed, ready to use</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
                     <span>Designed by accessibility experts</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
                     <span>Works on all devices and browsers</span>
                   </li>
                 </ul>

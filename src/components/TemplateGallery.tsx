@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen, Pill, MessageSquare, Home, Brain, Shield, Zap } from 'lucide-react';
 
 interface TemplateGalleryProps {
-  onTemplateSelect: (template: string) => void;
+  onTemplateSelect: (templatePrompt: string) => void;
 }
 
 const templates = [
@@ -61,7 +61,7 @@ const templates = [
 
 const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) => {
   return (
-    <Card className="border-white/40 shadow-xl bg-white/90 backdrop-blur-xl overflow-hidden">
+    <Card className="border-gray-700/40 shadow-2xl bg-gray-800/90 backdrop-blur-xl overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 text-white">
         <CardTitle className="flex items-center space-x-3 text-xl">
           <Zap className="h-6 w-6" />
@@ -73,7 +73,7 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
           {templates.map((template, index) => (
             <div
               key={index}
-              className="group relative overflow-hidden rounded-2xl border border-white/60 bg-white/70 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 hover:shadow-lg hover:scale-105"
+              className="group relative overflow-hidden rounded-2xl border border-gray-600/60 bg-gray-700/70 backdrop-blur-sm hover:bg-gray-600/90 transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer"
             >
               <div className="p-6">
                 <div className="flex items-start space-x-4">
@@ -81,10 +81,10 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
                     <template.icon className="h-6 w-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-lg mb-2 group-hover:text-gray-800 transition-colors">
+                    <h3 className="font-bold text-gray-100 text-lg mb-2 group-hover:text-white transition-colors">
                       {template.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
+                    <p className="text-sm text-gray-300 mb-4 line-clamp-3 leading-relaxed">
                       {template.description}
                     </p>
                     <Button
@@ -102,26 +102,26 @@ const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onTemplateSelect }) =
           ))}
         </div>
         
-        <div className="mt-8 p-6 bg-gradient-to-r from-blue-50/80 to-purple-50/80 rounded-2xl border border-white/60 backdrop-blur-sm">
-          <h4 className="font-bold text-gray-900 mb-2 flex items-center space-x-2">
-            <Zap className="h-5 w-5 text-blue-600" />
+        <div className="mt-8 p-6 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-2xl border border-gray-600/60 backdrop-blur-sm">
+          <h4 className="font-bold text-gray-100 mb-2 flex items-center space-x-2">
+            <Zap className="h-5 w-5 text-blue-400" />
             <span>Revolutionary Features</span>
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
               <span>Real-time AI assistance</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
               <span>Emergency response integration</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               <span>Personalized user experiences</span>
             </div>
             <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
               <span>Cross-platform compatibility</span>
             </div>
           </div>
