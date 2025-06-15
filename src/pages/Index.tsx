@@ -1,50 +1,17 @@
-
 import React, { useState } from 'react';
 import { Mic, MicOff, Send, Sparkles, Zap, Brain, Calendar, Timer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import VoiceInput from '@/components/VoiceInput';
 import ToolPreview from '@/components/ToolPreview';
 import TemplateGallery from '@/components/TemplateGallery';
-import GeminiProcessor from '@/components/GeminiProcessor';
+import { useGemini } from '@/hooks/useGemini';
 
 const Index = () => {
   const [prompt, setPrompt] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [generatedTool, setGeneratedTool] = useState(null);
   const [isListening, setIsListening] = useState(false);
-  const { toast } = useToast();
-
-  const handlePromptSubmit = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: "Input Required",
-        description: "Please enter a description of the accessibility tool you need.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      // This will be handled by the GeminiProcessor component
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulated processing
-      toast({
-        title: "Tool Generated Successfully!",
-        description: "Your accessibility tool has been created.",
-      });
-    } catch (error) {
-      toast({
-        title: "Generation Failed",
-        description: "There was an error generating your tool. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const { isProcessing, generatedTool, generateTool } = useGemini();
 
   const handleVoiceInput = (transcript: string) => {
     setPrompt(transcript);
@@ -106,7 +73,7 @@ const Index = () => {
                     />
                     
                     <Button 
-                      onClick={handlePromptSubmit}
+                      onClick={() => generateTool(prompt)}
                       disabled={isProcessing || !prompt.trim()}
                       className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-6 py-3"
                       size="lg"
@@ -179,13 +146,6 @@ const Index = () => {
           </div>
         </div>
       </main>
-
-      {/* Gemini Processor */}
-      <GeminiProcessor 
-        prompt={prompt}
-        isProcessing={isProcessing}
-        onToolGenerated={setGeneratedTool}
-      />
     </div>
   );
 };

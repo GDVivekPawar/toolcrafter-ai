@@ -5,7 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Eye, Download, Share, Code } from 'lucide-react';
 
 interface ToolPreviewProps {
-  tool: any;
+  tool: {
+    toolName: string;
+    features: string[];
+    implementation: string[];
+    uiComponents: string[];
+  } | null;
   isProcessing: boolean;
 }
 
@@ -36,20 +41,9 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
     );
   }
 
-  // Mock generated tool preview
-  const mockTool = {
-    title: "ADHD Daily Planner Pro",
-    description: "A voice-controlled daily planner designed specifically for ADHD users with task breakdown and audio reminders.",
-    features: [
-      "Voice-to-text task input",
-      "Automatic task breakdown",
-      "Customizable audio reminders",
-      "Visual progress tracking",
-      "Dopamine reward system",
-      "Flexible rescheduling"
-    ],
-    preview: "Interactive daily planner with color-coded tasks and gentle notification sounds"
-  };
+  if (!tool) {
+    return null;
+  }
 
   return (
     <Card className="border-green-200 shadow-lg">
@@ -61,14 +55,13 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
       </CardHeader>
       <CardContent className="p-6 space-y-6">
         <div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{mockTool.title}</h3>
-          <p className="text-gray-600 mb-4">{mockTool.description}</p>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">{tool.toolName}</h3>
         </div>
 
         <div>
           <h4 className="font-semibold text-gray-900 mb-3">Key Features:</h4>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {mockTool.features.map((feature, index) => (
+            {tool.features.map((feature, index) => (
               <li key={index} className="flex items-center space-x-2 text-sm text-gray-700">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span>{feature}</span>
@@ -76,25 +69,28 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
             ))}
           </ul>
         </div>
+        
+        <div>
+          <h4 className="font-semibold text-gray-900 mb-3">Implementation Steps:</h4>
+          <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
+            {tool.implementation.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ol>
+        </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg border">
-          <h4 className="font-semibold text-gray-900 mb-2">Tool Preview:</h4>
-          <div className="bg-white p-4 rounded border border-gray-200 min-h-[200px] flex items-center justify-center">
-            <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-green-500 rounded-full mx-auto flex items-center justify-center">
-                <span className="text-white text-xl">📅</span>
-              </div>
-              <p className="text-gray-600">{mockTool.preview}</p>
-              <div className="flex justify-center space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              </div>
-            </div>
+        <div>
+          <h4 className="font-semibold text-gray-900 mb-3">Suggested UI Components:</h4>
+          <div className="flex flex-wrap gap-2">
+            {tool.uiComponents.map((component, index) => (
+              <span key={index} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                {component}
+              </span>
+            ))}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 pt-6 border-t">
           <Button className="bg-blue-500 hover:bg-blue-600 text-white">
             <Eye className="h-4 w-4 mr-2" />
             Live Preview
