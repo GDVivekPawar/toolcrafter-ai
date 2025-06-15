@@ -7,6 +7,8 @@ import VoiceInput from '@/components/VoiceInput';
 import ToolPreview from '@/components/ToolPreview';
 import TemplateGallery from '@/components/TemplateGallery';
 import { useGemini } from '@/hooks/useGemini';
+import HighContrastToggle from '@/components/HighContrastToggle';
+import Footer from '@/components/Footer';
 
 const Index = () => {
   const [prompt, setPrompt] = useState('');
@@ -36,16 +38,27 @@ const Index = () => {
                 <p className="text-sm text-gray-600">AI-Powered Accessibility Tools</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
-              <Zap className="h-4 w-4 text-yellow-500" />
-              <span>Powered by Google Gemini</span>
+            <div className="flex items-center space-x-4">
+              <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-600">
+                <Zap className="h-4 w-4 text-yellow-500" />
+                <span>Powered by Google Gemini</span>
+              </div>
+              <HighContrastToggle />
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Skip link for keyboard navigation */}
+        <a 
+          href="#main-content" 
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50"
+        >
+          Skip to main content
+        </a>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" id="main-content">
           {/* Input Section */}
           <div className="lg:col-span-2 space-y-6">
             <Card className="border-blue-200 shadow-lg">
@@ -77,10 +90,15 @@ const Index = () => {
                       disabled={isProcessing || !prompt.trim()}
                       className="bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white px-6 py-3"
                       size="lg"
+                      aria-label="Generate accessibility tool based on your description"
                     >
                       {isProcessing ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                          <div 
+                            className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"
+                            role="status"
+                            aria-label="Generating tool..."
+                          />
                           Generating...
                         </>
                       ) : (
@@ -124,6 +142,7 @@ const Index = () => {
                     variant="outline"
                     className="w-full justify-start border-gray-200 hover:bg-gray-50"
                     onClick={() => handleTemplateSelect(`Create a ${template.text.toLowerCase()} tool for neurodivergent users`)}
+                    aria-label={`Use ${template.text} template`}
                   >
                     <template.icon className={`h-4 w-4 mr-2 text-${template.color}-500`} />
                     {template.text}
@@ -137,15 +156,19 @@ const Index = () => {
                 <CardTitle className="text-lg text-yellow-800">Tips for Better Results</CardTitle>
               </CardHeader>
               <CardContent className="p-4 text-sm text-yellow-700 space-y-2">
-                <p>• Be specific about your needs and challenges</p>
-                <p>• Mention any sensory preferences</p>
-                <p>• Include your daily routine context</p>
-                <p>• Specify accessibility requirements</p>
+                <ul className="space-y-1" role="list">
+                  <li>• Be specific about your needs and challenges</li>
+                  <li>• Mention any sensory preferences</li>
+                  <li>• Include your daily routine context</li>
+                  <li>• Specify accessibility requirements</li>
+                </ul>
               </CardContent>
             </Card>
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 };

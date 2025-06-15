@@ -47,15 +47,34 @@ Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, a
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error.message || 'Gemini API request failed');
+        let errorMessage = 'Failed to generate tool';
+        
+        if (response.status === 401) {
+          errorMessage = 'Invalid API key. Please check your Gemini API key.';
+        } else if (response.status === 429) {
+          errorMessage = 'Too many requests. Please wait a moment and try again.';
+        } else if (response.status >= 500) {
+          errorMessage = 'Gemini service is temporarily unavailable. Please try again later.';
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
+      
+      if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('Invalid response format from Gemini API');
+      }
+      
       const textResponse = data.candidates[0].content.parts[0].text;
       
       const jsonString = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
       const tool = JSON.parse(jsonString);
+
+      // Validate the tool structure
+      if (!tool.toolName || !tool.features || !tool.implementation || !tool.uiComponents) {
+        throw new Error('Generated tool is missing required fields');
+      }
 
       setGeneratedTool(tool);
       toast({
@@ -65,9 +84,22 @@ Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, a
 
     } catch (error: any) {
       console.error('Gemini processing error:', error);
+      
+      let userMessage = "There was an error processing your request. Please try again.";
+      
+      if (error.message.includes('JSON')) {
+        userMessage = "The AI generated an invalid response. Please try rephrasing your request.";
+      } else if (error.message.includes('API key')) {
+        userMessage = error.message;
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        userMessage = "Network error. Please check your connection and try again.";
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+      
       toast({
         title: "Processing Error",
-        description: error.message || "There was an error processing your request. Please check your API key and try again.",
+        description: userMessage,
         variant: "destructive"
       });
       setGeneratedTool(null);

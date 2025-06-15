@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -176,4 +175,65 @@
   .gradient-focus {
     background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
   }
+}
+
+/* High contrast mode styles */
+.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 0%;
+  --card-foreground: 0 0% 100%;
+  --primary: 60 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 80%;
+  --accent: 0 0% 20%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 40%;
+  --input: 0 0% 20%;
+  --ring: 60 100% 50%;
+}
+
+.high-contrast * {
+  border-color: hsl(var(--border)) !important;
+}
+
+.high-contrast .bg-gradient-to-r,
+.high-contrast .bg-gradient-to-br {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.high-contrast .text-gray-600,
+.high-contrast .text-gray-700,
+.high-contrast .text-gray-800,
+.high-contrast .text-gray-900 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.high-contrast .bg-blue-100,
+.high-contrast .bg-green-100,
+.high-contrast .bg-yellow-50 {
+  background-color: hsl(var(--secondary)) !important;
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.high-contrast .border-blue-200,
+.high-contrast .border-green-200,
+.high-contrast .border-yellow-200 {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Enhanced focus indicators for high contrast */
+.high-contrast *:focus {
+  outline: 3px solid hsl(var(--ring)) !important;
+  outline-offset: 2px !important;
+}
+
+.high-contrast button:focus {
+  box-shadow: 0 0 0 3px hsl(var(--ring)) !important;
 }
