@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { GeneratedTool } from '@/types/tool';
 
 export const useGemini = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [generatedTool, setGeneratedTool] = useState(null);
+  const [generatedTool, setGeneratedTool] = useState<GeneratedTool | null>(null);
   const { toast } = useToast();
 
   const generateTool = async (prompt: string) => {
@@ -25,15 +26,18 @@ export const useGemini = () => {
     setIsProcessing(true);
     setGeneratedTool(null);
 
-    const systemPrompt = `You are an accessibility tool generator. For each request, return a JSON response with:
+    const systemPrompt = `You are an expert React developer specializing in accessibility tools. For each request, generate a fully functional, single-file React component using TypeScript, Tailwind CSS, and lucide-react icons.
+
+Return a JSON response with the following structure:
 {
-  "toolName": "Short descriptive name",
-  "features": ["Feature 1", "Feature 2", "Feature 3"],
-  "implementation": ["Step 1", "Step 2", "Step 3"],
-  "uiComponents": ["Component 1", "Component 2"]
+  "toolName": "Short descriptive name for the tool",
+  "features": ["Brief description of feature 1", "Brief description of feature 2"],
+  "implementation": ["A high-level overview of implementation step 1", "Step 2"],
+  "uiComponents": ["UI component used 1", "UI component used 2"],
+  "componentCode": "const ToolComponent = () => { /* The complete, self-contained JSX and logic for the tool. Use hooks like useState and useEffect. Use TailwindCSS for styling and lucide-react for icons. Do not include imports or exports. The component should be a single const, not a default export. */ };"
 }
 
-Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, and executive-function friendly.`;
+Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, and executive-function friendly. Ensure the code is clean, readable, and ready to be dynamically rendered.`;
 
     const fullPrompt = `${systemPrompt}\n\nUser Request: ${prompt}`;
 
@@ -69,10 +73,10 @@ Focus on ADHD/Autism accessibility needs. Make tools voice-controlled, visual, a
       const textResponse = data.candidates[0].content.parts[0].text;
       
       const jsonString = textResponse.replace(/```json/g, '').replace(/```/g, '').trim();
-      const tool = JSON.parse(jsonString);
+      const tool = JSON.parse(jsonString) as GeneratedTool;
 
       // Validate the tool structure
-      if (!tool.toolName || !tool.features || !tool.implementation || !tool.uiComponents) {
+      if (!tool.toolName || !tool.features || !tool.implementation || !tool.uiComponents || !tool.componentCode) {
         throw new Error('Generated tool is missing required fields');
       }
 

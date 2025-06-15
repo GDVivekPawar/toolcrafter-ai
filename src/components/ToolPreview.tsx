@@ -1,19 +1,13 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, Download, Share, Code, Volume2, VolumeX, FileText } from 'lucide-react';
+import { Eye, Volume2, VolumeX, Zap, Github } from 'lucide-react';
 import { useTextToSpeech } from '@/hooks/useTextToSpeech';
-import { exportToText, exportToPDF } from '@/utils/exportUtils';
 import LivePreviewModal from './LivePreviewModal';
+import { GeneratedTool } from '@/types/tool';
 
 interface ToolPreviewProps {
-  tool: {
-    toolName: string;
-    features: string[];
-    implementation: string[];
-    uiComponents: string[];
-  } | null;
+  tool: GeneratedTool | null;
   isProcessing: boolean;
 }
 
@@ -146,38 +140,23 @@ const ToolPreview: React.FC<ToolPreviewProps> = ({ tool, isProcessing }) => {
               Live Preview
             </Button>
             <Button 
-              variant="outline" 
-              className="border-green-500 text-green-600 hover:bg-green-50"
-              onClick={() => exportToText(tool)}
-              aria-label="Download tool specification as text file"
+              className="bg-green-600 hover:bg-green-700 text-white"
+              aria-label="Deploy the tool (coming soon)"
+              disabled
+              title="Deployment feature coming soon"
             >
-              <FileText className="h-4 w-4 mr-2" aria-hidden="true" />
-              Download TXT
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-purple-500 text-purple-600 hover:bg-purple-50"
-              onClick={() => exportToPDF(tool)}
-              aria-label="Download tool specification as PDF"
-            >
-              <Download className="h-4 w-4 mr-2" aria-hidden="true" />
-              Download PDF
+              <Zap className="h-4 w-4 mr-2" />
+              Deploy
             </Button>
             <Button 
               variant="outline" 
               className="border-gray-500 text-gray-600 hover:bg-gray-50"
-              aria-label="Share tool specification"
+              aria-label="View on Git (coming soon)"
+              disabled
+              title="GitHub integration coming soon"
             >
-              <Share className="h-4 w-4 mr-2" aria-hidden="true" />
-              Share
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-gray-500 text-gray-600 hover:bg-gray-50"
-              aria-label="View implementation code"
-            >
-              <Code className="h-4 w-4 mr-2" aria-hidden="true" />
-              View Code
+              <Github className="h-4 w-4 mr-2" />
+              View on Git
             </Button>
           </div>
         </CardContent>

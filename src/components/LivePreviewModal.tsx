@@ -7,16 +7,12 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { GeneratedTool } from '@/types/tool';
 
 interface LivePreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  tool: {
-    toolName: string;
-    features: string[];
-    implementation: string[];
-    uiComponents: string[];
-  } | null;
+  tool: GeneratedTool | null;
 }
 
 const LivePreviewModal: React.FC<LivePreviewModalProps> = ({ isOpen, onClose, tool }) => {
@@ -24,21 +20,19 @@ const LivePreviewModal: React.FC<LivePreviewModalProps> = ({ isOpen, onClose, to
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-[800px] h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{tool.toolName} - Live Preview</DialogTitle>
+          <DialogTitle>{tool.toolName} - Generated Code</DialogTitle>
           <DialogDescription>
-            This is an interactive preview of your generated accessibility tool.
+            This is the auto-generated code for your tool. Dynamic rendering will be implemented next!
           </DialogDescription>
         </DialogHeader>
-        <div className="flex-grow border-t pt-4 mt-4 overflow-y-auto">
-          <p className="text-center text-gray-500 italic">Dynamic tool rendering will be implemented here.</p>
-          <p className="mt-4 font-semibold">Suggested UI Components:</p>
-          <ul className="list-disc pl-5 mt-2 space-y-1">
-            {tool.uiComponents.map((component, index) => (
-              <li key={index}>{component}</li>
-            ))}
-          </ul>
+        <div className="flex-grow border-t pt-4 mt-4 overflow-auto bg-gray-900 text-white font-mono text-sm rounded-md p-4">
+          <pre>
+            <code>
+              {tool.componentCode}
+            </code>
+          </pre>
         </div>
       </DialogContent>
     </Dialog>
