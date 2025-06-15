@@ -66,7 +66,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  AccessiGen
+                  ToolCrafter.Ai
                 </h1>
                 <p className="text-sm text-gray-600 font-medium">Revolutionary AI-Powered Accessibility</p>
               </div>

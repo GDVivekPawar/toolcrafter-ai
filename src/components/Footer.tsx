@@ -10,7 +10,7 @@ const Footer = () => {
           <p className="text-gray-600 flex items-center justify-center space-x-2">
             <span>Built for accessibility hackathon with</span>
             <Heart className="h-4 w-4 text-red-500" />
-            <span>by Lovable AI</span>
+            <span>by ToolCrafter.Ai</span>
           </p>
           <p className="text-sm text-gray-500">
             Empowering everyone through accessible technology
