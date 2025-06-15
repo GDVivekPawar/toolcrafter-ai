@@ -1,3 +1,4 @@
+import React from 'react';
 
 export const useAccessibleTimer = (initialMinutes: number = 25) => {
   const [minutes, setMinutes] = React.useState(initialMinutes);
