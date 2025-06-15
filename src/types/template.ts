@@ -3,7 +3,7 @@ export interface ToolTemplate {
   id: string;
   name: string;
   description: string;
-  category: 'timer' | 'planner' | 'sensory' | 'memory' | 'focus' | 'communication';
+  category: 'timer' | 'planner' | 'sensory' | 'memory' | 'focus' | 'communication' | 'health' | 'routine';
   keywords: string[];
   component: React.ComponentType;
   features: string[];
