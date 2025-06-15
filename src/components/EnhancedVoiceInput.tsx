@@ -25,130 +25,173 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
   const [isEnabled, setIsEnabled] = useState(autoStart);
   const [isStarting, setIsStarting] = useState(false);
   const [hasWelcomed, setHasWelcomed] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const welcomeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-  const { speak } = useTextToSpeech();
+  const { speak, isSpeaking } = useTextToSpeech();
   const { parseVoiceCommand } = useVoiceCommands();
 
   // Clear all timeouts
   const clearAllTimeouts = () => {
-    if (restartTimeoutRef.current) {
-      clearTimeout(restartTimeoutRef.current);
-      restartTimeoutRef.current = null;
+    [restartTimeoutRef, welcomeTimeoutRef, initTimeoutRef].forEach(ref => {
+      if (ref.current) {
+        clearTimeout(ref.current);
+        ref.current = null;
+      }
+    });
+  };
+
+  // Initialize speech recognition
+  const initializeSpeechRecognition = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      console.log('Speech recognition not supported');
+      return false;
     }
-    if (welcomeTimeoutRef.current) {
-      clearTimeout(welcomeTimeoutRef.current);
-      welcomeTimeoutRef.current = null;
+
+    if (recognitionRef.current) {
+      return true; // Already initialized
+    }
+
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onstart = () => {
+        console.log('Speech recognition started');
+        setIsListening(true);
+        setIsStarting(false);
+      };
+
+      recognitionRef.current.onresult = (event) => {
+        if (event.results.length > 0) {
+          const transcript = event.results[0][0].transcript;
+          console.log('Voice input received:', transcript);
+          
+          // Try to parse as command first
+          if ((mode === 'command' || mode === 'both')) {
+            const wasCommand = parseVoiceCommand(transcript);
+            if (wasCommand && onCommand) {
+              onCommand(transcript);
+              return;
+            }
+          }
+          
+          // If not a command or in transcript mode, pass to transcript handler
+          if ((mode === 'transcript' || mode === 'both') && onTranscript) {
+            onTranscript(transcript);
+          }
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        setIsStarting(false);
+        clearAllTimeouts();
+        
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          setIsEnabled(false);
+          toast({
+            title: "Microphone Access Denied",
+            description: "Please allow microphone access to use voice control.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Only restart for recoverable errors and if still enabled
+        if (isEnabled && !isSpeaking && (event.error === 'no-speech' || event.error === 'network')) {
+          restartTimeoutRef.current = setTimeout(() => {
+            if (isEnabled && !isListening && !isStarting && !isSpeaking) {
+              startListening();
+            }
+          }, 2000);
+        }
+      };
+
+      recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended');
+        setIsListening(false);
+        setIsStarting(false);
+        
+        // Auto-restart only if enabled, not speaking, and not manually stopped
+        if (isEnabled && !isStarting && !isSpeaking) {
+          restartTimeoutRef.current = setTimeout(() => {
+            if (isEnabled && !isListening && !isStarting && !isSpeaking) {
+              startListening();
+            }
+          }, 1000);
+        }
+      };
+
+      return true;
+    } catch (error) {
+      console.error('Failed to initialize speech recognition:', error);
+      return false;
     }
   };
 
   useEffect(() => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      console.log('Speech recognition not supported');
-      return;
-    }
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    
-    recognitionRef.current.continuous = false;
-    recognitionRef.current.interimResults = false;
-    recognitionRef.current.lang = 'en-US';
-
-    recognitionRef.current.onstart = () => {
-      console.log('Speech recognition started');
-      setIsListening(true);
-      setIsStarting(false);
-    };
-
-    recognitionRef.current.onresult = (event) => {
-      if (event.results.length > 0) {
-        const transcript = event.results[0][0].transcript;
-        console.log('Voice input received:', transcript);
-        
-        // Try to parse as command first
-        if ((mode === 'command' || mode === 'both')) {
-          const wasCommand = parseVoiceCommand(transcript);
-          if (wasCommand && onCommand) {
-            onCommand(transcript);
-            return;
-          }
-        }
-        
-        // If not a command or in transcript mode, pass to transcript handler
-        if ((mode === 'transcript' || mode === 'both') && onTranscript) {
-          onTranscript(transcript);
-        }
-      }
-    };
-
-    recognitionRef.current.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setIsListening(false);
-      setIsStarting(false);
-      clearAllTimeouts();
+    // Initialize with a delay to avoid immediate conflicts
+    initTimeoutRef.current = setTimeout(() => {
+      const initialized = initializeSpeechRecognition();
+      setIsInitialized(initialized);
       
-      // Only restart for specific errors and if still enabled
-      if (isEnabled && (event.error === 'no-speech' || event.error === 'network')) {
-        restartTimeoutRef.current = setTimeout(() => {
-          if (isEnabled && !isListening && !isStarting) {
-            startListening();
-          }
-        }, 2000);
-      }
-    };
-
-    recognitionRef.current.onend = () => {
-      console.log('Speech recognition ended');
-      setIsListening(false);
-      setIsStarting(false);
-      
-      // Auto-restart only if enabled and not manually stopped
-      if (isEnabled && !isStarting) {
-        restartTimeoutRef.current = setTimeout(() => {
-          if (isEnabled && !isListening && !isStartening) {
-            startListening();
-          }
-        }, 1000);
-      }
-    };
-
-    // Auto-start with welcome message (only once)
-    if (autoStart && isEnabled && !hasWelcomed) {
-      setHasWelcomed(true);
-      welcomeTimeoutRef.current = setTimeout(() => {
+      // Auto-start with welcome message (only once and if enabled)
+      if (initialized && autoStart && isEnabled && !hasWelcomed) {
+        setHasWelcomed(true);
+        
         if (welcomeMessage) {
-          speak(welcomeMessage);
+          setTimeout(() => {
+            speak(welcomeMessage);
+            
+            // Start listening after welcome message completes
+            setTimeout(() => {
+              if (isEnabled && !isListening && !isStarting && !isSpeaking) {
+                startListening();
+              }
+            }, 6000); // Wait longer for speech to complete
+          }, 1500);
+        } else {
+          // Start immediately if no welcome message
+          setTimeout(() => {
+            if (isEnabled && !isListening && !isStarting) {
+              startListening();
+            }
+          }, 1000);
         }
-        setTimeout(() => {
-          if (isEnabled && !isListening && !isStarting) {
-            startListening();
-          }
-        }, 4000);
-      }, 1000);
-    }
+      }
+    }, 500);
 
     return () => {
       clearAllTimeouts();
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
+          recognitionRef.current = null;
         } catch (error) {
-          console.log('Error stopping recognition:', error);
+          console.log('Error cleaning up recognition:', error);
         }
       }
     };
   }, []);
 
   const startListening = () => {
-    if (!recognitionRef.current || !isEnabled || isListening || isStarting) {
+    if (!isInitialized || !recognitionRef.current || !isEnabled || isListening || isStarting || isSpeaking) {
       console.log('Cannot start listening:', { 
+        isInitialized,
         hasRecognition: !!recognitionRef.current, 
         isEnabled, 
         isListening,
-        isStarting 
+        isStarting,
+        isSpeaking
       });
       return;
     }
@@ -161,6 +204,12 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
       console.error('Failed to start recognition:', error);
       setIsStarting(false);
       setIsListening(false);
+      
+      if (error instanceof Error && error.name === 'InvalidStateError') {
+        // Recognition is already running, just update our state
+        setIsListening(true);
+        setIsStarting(false);
+      }
     }
   };
 
@@ -187,10 +236,10 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
       setIsEnabled(true);
       speak('Voice control enabled. Say help for available commands.');
       setTimeout(() => {
-        if (!isListening && !isStarting) {
+        if (!isListening && !isStarting && !isSpeaking) {
           startListening();
         }
-      }, 2000);
+      }, 3000); // Wait for speech to complete
     }
   };
 
