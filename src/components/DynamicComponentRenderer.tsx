@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 import { useAccessibleTimer, announceToScreenReader, speakText } from '@/utils/accessibilityUtils';
@@ -131,50 +130,60 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
 // Code validation function
 const validateCode = (code: string): { isValid: boolean; error: string } => {
   try {
-    // Check for basic component structure
-    if (!code.includes('const ToolComponent')) {
-      return {
-        isValid: false,
-        error: 'Component must be named "ToolComponent" and use const declaration'
-      };
-    }
-
-    // Check for proper React import usage
-    if (code.includes('React.') && !code.includes('import React')) {
-      return {
-        isValid: false,
-        error: 'React is available in scope, no need to import or use React.functionName'
-      };
-    }
-
-    // Check for common icon case issues
-    const lowercaseIcons = ['<play', '<pause', '<timer', '<settings'];
-    for (const icon of lowercaseIcons) {
-      if (code.toLowerCase().includes(icon)) {
+    // 1. Check for forbidden keywords that indicate incorrect structure
+    const forbiddenKeywords = ['import', 'export', 'class '];
+    for (const keyword of forbiddenKeywords) {
+      if (code.includes(keyword)) {
         return {
           isValid: false,
-          error: `Icon names must be PascalCase. Use ${icon.charAt(1).toUpperCase() + icon.slice(2)} instead of ${icon.slice(1)}`
+          error: `The code should not contain '${keyword}' statements. All dependencies are already in scope.`,
         };
       }
     }
 
-    // Check for unmatched brackets (basic check)
-    const openBrackets = (code.match(/{/g) || []).length;
-    const closeBrackets = (code.match(/}/g) || []).length;
-    if (openBrackets !== closeBrackets) {
+    // 2. Check for required component definition
+    if (!/const\s+ToolComponent\s*=/.test(code)) {
       return {
         isValid: false,
-        error: `Mismatched curly brackets: ${openBrackets} opening, ${closeBrackets} closing`
+        error: 'Component must be defined as a constant, like `const ToolComponent = () => ...;`',
       };
     }
 
-    const openParens = (code.match(/\(/g) || []).length;
-    const closeParens = (code.match(/\)/g) || []).length;
-    if (openParens !== closeParens) {
+    // 3. Check for "React." prefix on hooks
+    if (/React\.(useState|useEffect|useCallback|useMemo|useRef)/.test(code)) {
       return {
         isValid: false,
-        error: `Mismatched parentheses: ${openParens} opening, ${closeParens} closing`
+        error: 'Do not prefix hooks with "React.". Use `useState`, `useEffect`, etc. directly.',
       };
+    }
+
+    // 4. Check for lowercase icon names
+    const lowercaseIconRegex = /<(\/)?(play|pause|timer|settings|volume2|volumex|rotateccw|plus|minus|check|x|eye|zap|github|search|code|arrow-up|arrow-down)[\s>]/;
+    const match = code.match(lowercaseIconRegex);
+    if (match) {
+      const iconName = match[2];
+      const pascalCaseName = iconName.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+      return {
+        isValid: false,
+        error: `Icon names must be PascalCase. Replace '${iconName}' with '${pascalCaseName}'.`,
+      };
+    }
+
+    // 5. Check for balanced parentheses and brackets
+    const brackets: { [key: string]: string } = { '(': ')', '{': '}', '[': ']' };
+    const stack: string[] = [];
+    for (const char of code) {
+      if (brackets.hasOwnProperty(char)) {
+        stack.push(char);
+      } else if (Object.values(brackets).includes(char)) {
+        const lastOpen = stack.pop();
+        if (!lastOpen || brackets[lastOpen] !== char) {
+          return { isValid: false, error: `Mismatched brackets or parentheses. Found closing '${char}' without a matching opening bracket.` };
+        }
+      }
+    }
+    if (stack.length > 0) {
+      return { isValid: false, error: `Mismatched brackets or parentheses. Missing closing bracket for '${stack[stack.length - 1]}'.` };
     }
 
     return { isValid: true, error: '' };
