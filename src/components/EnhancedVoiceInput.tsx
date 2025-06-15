@@ -22,37 +22,36 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
   welcomeMessage = "Welcome to AccessiGen! Voice control is now active. Say 'help' to hear available commands, or describe what accessibility tool you need."
 }) => {
   const [isListening, setIsListening] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(autoStart);
-  const [isStarting, setIsStarting] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
   const [hasWelcomed, setHasWelcomed] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+  
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const isInitializedRef = useRef(false);
   const restartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const welcomeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   const { toast } = useToast();
-  const { speak, isSpeaking } = useTextToSpeech();
+  const { speak, isSpeaking, stopSpeaking } = useTextToSpeech();
   const { parseVoiceCommand } = useVoiceCommands();
 
   // Clear all timeouts
-  const clearAllTimeouts = () => {
-    [restartTimeoutRef, welcomeTimeoutRef, initTimeoutRef].forEach(ref => {
-      if (ref.current) {
-        clearTimeout(ref.current);
-        ref.current = null;
-      }
-    });
+  const clearTimeouts = () => {
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
+    }
+    if (initTimeoutRef.current) {
+      clearTimeout(initTimeoutRef.current);
+      initTimeoutRef.current = null;
+    }
   };
 
   // Initialize speech recognition
-  const initializeSpeechRecognition = () => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      console.log('Speech recognition not supported');
-      return false;
-    }
-
-    if (recognitionRef.current) {
-      return true; // Already initialized
+  const initializeSpeechRecognition = (): boolean => {
+    if (isInitializedRef.current || !('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      console.log('Speech recognition not available or already initialized');
+      return isInitializedRef.current;
     }
 
     try {
@@ -66,12 +65,11 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
       recognitionRef.current.onstart = () => {
         console.log('Speech recognition started');
         setIsListening(true);
-        setIsStarting(false);
       };
 
       recognitionRef.current.onresult = (event) => {
         if (event.results.length > 0) {
-          const transcript = event.results[0][0].transcript;
+          const transcript = event.results[0][0].transcript.trim();
           console.log('Voice input received:', transcript);
           
           // Try to parse as command first
@@ -93,44 +91,43 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
       recognitionRef.current.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
-        setIsStarting(false);
-        clearAllTimeouts();
         
         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
           setIsEnabled(false);
           toast({
-            title: "Microphone Access Denied",
-            description: "Please allow microphone access to use voice control.",
+            title: "Microphone Access Required",
+            description: "Please allow microphone access and refresh the page to use voice control.",
             variant: "destructive"
           });
           return;
         }
         
-        // Only restart for recoverable errors and if still enabled
-        if (isEnabled && !isSpeaking && (event.error === 'no-speech' || event.error === 'network')) {
+        // Auto-restart for recoverable errors
+        if (isEnabled && !isSpeaking && (event.error === 'no-speech' || event.error === 'network' || event.error === 'aborted')) {
           restartTimeoutRef.current = setTimeout(() => {
-            if (isEnabled && !isListening && !isStarting && !isSpeaking) {
+            if (isEnabled && !isListening && !isSpeaking) {
               startListening();
             }
-          }, 2000);
+          }, 1500);
         }
       };
 
       recognitionRef.current.onend = () => {
         console.log('Speech recognition ended');
         setIsListening(false);
-        setIsStarting(false);
         
-        // Auto-restart only if enabled, not speaking, and not manually stopped
-        if (isEnabled && !isStarting && !isSpeaking) {
+        // Auto-restart if enabled and not speaking
+        if (isEnabled && !isSpeaking) {
           restartTimeoutRef.current = setTimeout(() => {
-            if (isEnabled && !isListening && !isStarting && !isSpeaking) {
+            if (isEnabled && !isListening && !isSpeaking) {
               startListening();
             }
-          }, 1000);
+          }, 800);
         }
       };
 
+      isInitializedRef.current = true;
+      console.log('Speech recognition initialized successfully');
       return true;
     } catch (error) {
       console.error('Failed to initialize speech recognition:', error);
@@ -138,84 +135,36 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
     }
   };
 
-  useEffect(() => {
-    // Initialize with a delay to avoid immediate conflicts
-    initTimeoutRef.current = setTimeout(() => {
-      const initialized = initializeSpeechRecognition();
-      setIsInitialized(initialized);
-      
-      // Auto-start with welcome message (only once and if enabled)
-      if (initialized && autoStart && isEnabled && !hasWelcomed) {
-        setHasWelcomed(true);
-        
-        if (welcomeMessage) {
-          setTimeout(() => {
-            speak(welcomeMessage);
-            
-            // Start listening after welcome message completes
-            setTimeout(() => {
-              if (isEnabled && !isListening && !isStarting && !isSpeaking) {
-                startListening();
-              }
-            }, 6000); // Wait longer for speech to complete
-          }, 1500);
-        } else {
-          // Start immediately if no welcome message
-          setTimeout(() => {
-            if (isEnabled && !isListening && !isStarting) {
-              startListening();
-            }
-          }, 1000);
-        }
-      }
-    }, 500);
-
-    return () => {
-      clearAllTimeouts();
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-          recognitionRef.current = null;
-        } catch (error) {
-          console.log('Error cleaning up recognition:', error);
-        }
-      }
-    };
-  }, []);
-
+  // Start listening function
   const startListening = () => {
-    if (!isInitialized || !recognitionRef.current || !isEnabled || isListening || isStarting || isSpeaking) {
+    if (!isInitializedRef.current || !recognitionRef.current || !isEnabled || isListening || isSpeaking) {
       console.log('Cannot start listening:', { 
-        isInitialized,
-        hasRecognition: !!recognitionRef.current, 
-        isEnabled, 
+        initialized: isInitializedRef.current,
+        hasRecognition: !!recognitionRef.current,
+        isEnabled,
         isListening,
-        isStarting,
         isSpeaking
       });
       return;
     }
     
     try {
-      setIsStarting(true);
       recognitionRef.current.start();
       console.log('Starting speech recognition...');
     } catch (error) {
-      console.error('Failed to start recognition:', error);
-      setIsStarting(false);
-      setIsListening(false);
+      const err = error as Error;
+      console.error('Failed to start recognition:', err.message);
       
-      if (error instanceof Error && error.name === 'InvalidStateError') {
-        // Recognition is already running, just update our state
+      if (err.name === 'InvalidStateError') {
+        // Recognition is already running, just update state
         setIsListening(true);
-        setIsStarting(false);
       }
     }
   };
 
+  // Stop listening function
   const stopListening = () => {
-    clearAllTimeouts();
-    setIsStarting(false);
+    clearTimeouts();
     setIsListening(false);
     
     if (recognitionRef.current) {
@@ -227,30 +176,96 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
     }
   };
 
+  // Toggle voice control
   const toggleVoiceControl = () => {
+    if (!isInitializedRef.current) {
+      toast({
+        title: "Voice Control Not Ready",
+        description: "Please wait for voice control to initialize.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (isEnabled) {
+      // Disable voice control
       setIsEnabled(false);
       stopListening();
+      stopSpeaking();
       speak('Voice control disabled');
     } else {
+      // Enable voice control
       setIsEnabled(true);
       speak('Voice control enabled. Say help for available commands.');
+      
+      // Start listening after speech completes
       setTimeout(() => {
-        if (!isListening && !isStarting && !isSpeaking) {
+        if (!isSpeaking && isEnabled) {
           startListening();
         }
-      }, 3000); // Wait for speech to complete
+      }, 3000);
     }
   };
 
+  // Announce help
   const announceHelp = () => {
-    speak('Voice commands: Say "help" for instructions, "start timer" for focus session, "memory aid" for reminders, "medication tracker" for pill reminders, "communication practice" for social scripts, "ADHD help" for task management, "autism routine" for structured guidance, or describe what you need help with.');
+    const helpText = 'Voice commands: Say "help" for instructions, "start timer" for focus session, "memory aid" for reminders, "medication tracker" for pill reminders, "communication practice" for social scripts, "ADHD help" for task management, "autism routine" for structured guidance, or describe what you need help with.';
+    speak(helpText);
   };
+
+  // Initialize on component mount
+  useEffect(() => {
+    if (isInitializing) return;
+    
+    setIsInitializing(true);
+    
+    initTimeoutRef.current = setTimeout(() => {
+      const initialized = initializeSpeechRecognition();
+      
+      if (initialized && autoStart && !hasWelcomed) {
+        setHasWelcomed(true);
+        setIsEnabled(true);
+        
+        if (welcomeMessage) {
+          setTimeout(() => {
+            speak(welcomeMessage);
+            
+            // Start listening after welcome message
+            setTimeout(() => {
+              if (isEnabled && !isSpeaking) {
+                startListening();
+              }
+            }, 8000); // Wait longer for speech to complete
+          }, 1000);
+        } else {
+          // Start immediately if no welcome message
+          setIsEnabled(true);
+          setTimeout(() => {
+            startListening();
+          }, 500);
+        }
+      }
+      
+      setIsInitializing(false);
+    }, 1000);
+
+    return () => {
+      clearTimeouts();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (error) {
+          console.log('Cleanup error:', error);
+        }
+      }
+    };
+  }, []);
 
   return (
     <div className="flex gap-2">
       <Button
         onClick={toggleVoiceControl}
+        disabled={isInitializing}
         variant={isEnabled ? (isListening ? "destructive" : "default") : "outline"}
         className={`px-4 py-2 ${
           isEnabled 
@@ -262,7 +277,12 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
         size="sm"
         aria-label={isEnabled ? "Voice control active" : "Voice control disabled"}
       >
-        {isEnabled ? (
+        {isInitializing ? (
+          <>
+            <div className="animate-spin rounded-full h-3 w-3 border-2 border-current border-t-transparent mr-1" />
+            Loading
+          </>
+        ) : isEnabled ? (
           isListening ? (
             <>
               <Mic className="h-3 w-3 mr-1" />
@@ -286,6 +306,7 @@ const EnhancedVoiceInput: React.FC<EnhancedVoiceInputProps> = ({
         onClick={announceHelp}
         variant="outline"
         size="sm"
+        disabled={!isInitializedRef.current}
         aria-label="Get voice help"
       >
         <Volume2 className="h-3 w-3" />
