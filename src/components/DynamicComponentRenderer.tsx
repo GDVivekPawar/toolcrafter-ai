@@ -26,9 +26,6 @@ interface DynamicComponentRendererProps {
   code: string;
 }
 
-// lucide-react has a default export that we don't need in the scope.
-const { default: _, ...icons } = LucideIcons;
-
 const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ code }) => {
   const [Component, setComponent] = useState<React.FC | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +34,7 @@ const DynamicComponentRenderer: React.FC<DynamicComponentRendererProps> = ({ cod
     // This scope provides the dependencies for the dynamically generated code.
     const scope = {
       ...ReactScope,
-      ...icons,
+      ...LucideIcons, // Use the entire LucideIcons object directly
       Button,
       Card, CardContent, CardHeader, CardTitle,
       Input,
