@@ -7,8 +7,85 @@ import MemoryPalace from '@/templates/MemoryPalace';
 import SeizureAlert from '@/templates/SeizureAlert';
 import Calculator from '@/templates/Calculator';
 import DailyPlanner from '@/templates/DailyPlanner';
+import FocusTimer from '@/templates/FocusTimer';
+import SensoryBreak from '@/templates/SensoryBreak';
+import EmergencyResponse from '@/templates/EmergencyResponse';
+
+// Synonym mapping for better keyword matching
+const synonyms: Record<string, string[]> = {
+  'timer': ['pomodoro', 'countdown', 'stopwatch', 'clock', 'time', 'focus', 'productivity', 'work'],
+  'calculator': ['math', 'arithmetic', 'compute', 'calculate', 'numbers', 'addition', 'subtraction'],
+  'planner': ['schedule', 'organize', 'todo', 'tasks', 'agenda', 'calendar', 'daily', 'planning'],
+  'reading': ['text', 'dyslexia', 'comprehension', 'books', 'study', 'learning', 'literacy'],
+  'medication': ['pills', 'medicine', 'drugs', 'prescription', 'dosage', 'health', 'medical'],
+  'communication': ['speech', 'talk', 'aac', 'nonverbal', 'autism', 'symbols', 'phrases'],
+  'memory': ['remember', 'cognitive', 'dementia', 'alzheimer', 'recall', 'brain', 'routine'],
+  'emergency': ['panic', 'crisis', 'help', 'alert', 'sos', 'urgent', 'safety', 'danger'],
+  'sensory': ['calm', 'anxiety', 'stress', 'overwhelm', 'regulation', 'stimming', 'fidget'],
+  'seizure': ['epilepsy', 'convulsions', 'fits', 'neurological', 'episode'],
+  'smart home': ['lights', 'temperature', 'devices', 'automation', 'control', 'environment']
+};
+
+// Emotional state indicators for better context analysis
+const emotionalStates: Record<string, string[]> = {
+  'urgent': ['emergency', 'urgent', 'immediate', 'now', 'quick', 'fast', 'help'],
+  'stressed': ['stressed', 'anxious', 'overwhelmed', 'panic', 'worried', 'scared'],
+  'calm': ['calm', 'relax', 'peaceful', 'soothing', 'quiet', 'gentle'],
+  'focused': ['focus', 'concentrate', 'attention', 'productivity', 'work', 'study']
+};
 
 export const availableTemplates: ToolTemplate[] = [
+  {
+    id: 'focus-timer',
+    name: 'Focus Timer with Sensory Breaks',
+    description: 'Pomodoro timer with integrated sensory regulation and breathing exercises for ADHD and focus support',
+    category: 'timer',
+    keywords: ['timer', 'focus', 'adhd', 'pomodoro', 'breaks', 'concentration', 'productivity', 'work', 'study', 'breathing', 'sensory'],
+    component: FocusTimer,
+    features: [
+      'Customizable work/break intervals',
+      'Integrated breathing exercises',
+      'Visual progress tracking',
+      'Audio notifications',
+      'ADHD-friendly design',
+      'Sensory break activities'
+    ],
+    difficulty: 'basic'
+  },
+  {
+    id: 'sensory-break',
+    name: 'Sensory Regulation Tool',
+    description: 'Comprehensive sensory toolkit with breathing exercises, visual patterns, fidget tools, and calming sounds',
+    category: 'sensory',
+    keywords: ['sensory', 'calm', 'stimming', 'fidget', 'breathing', 'anxiety', 'overwhelm', 'stress', 'regulation', 'autism', 'adhd'],
+    component: SensoryBreak,
+    features: [
+      '4-7-8 breathing exercises',
+      'Interactive fidget tools',
+      'Calming visual patterns',
+      'Nature and ambient sounds',
+      'Customizable intensity levels',
+      'Multiple sensory activities'
+    ],
+    difficulty: 'basic'
+  },
+  {
+    id: 'emergency-response',
+    name: 'Emergency Response System',
+    description: 'Comprehensive emergency alert system with one-touch alerts, medical information storage, and safety protocols',
+    category: 'timer',
+    keywords: ['emergency', 'panic', 'crisis', 'help', 'alert', 'safety', 'sos', 'urgent', 'medical', 'contact', 'response'],
+    component: EmergencyResponse,
+    features: [
+      'One-touch emergency alerts',
+      'Medical information storage',
+      'Emergency contact management',
+      'Location sharing capability',
+      'Quick-call functionality',
+      'Safety protocol guidance'
+    ],
+    difficulty: 'advanced'
+  },
   {
     id: 'calculator',
     name: 'Accessible Calculator',
@@ -147,6 +224,7 @@ export const availableTemplates: ToolTemplate[] = [
   }
 ];
 
+// Enhanced matching algorithm with synonym support and context analysis
 export const matchPromptToTemplate = (prompt: string): TemplateMatch | null => {
   const lowerPrompt = prompt.toLowerCase();
   const words = lowerPrompt.split(/\s+/);
@@ -154,11 +232,20 @@ export const matchPromptToTemplate = (prompt: string): TemplateMatch | null => {
   let bestMatch: TemplateMatch | null = null;
   let highestScore = 0;
 
+  // Detect emotional state for context
+  let emotionalContext = '';
+  for (const [state, indicators] of Object.entries(emotionalStates)) {
+    if (indicators.some(indicator => lowerPrompt.includes(indicator))) {
+      emotionalContext = state;
+      break;
+    }
+  }
+
   for (const template of availableTemplates) {
     let score = 0;
     let matchedKeywords: string[] = [];
 
-    // Check for keyword matches
+    // Direct keyword matching
     for (const keyword of template.keywords) {
       if (lowerPrompt.includes(keyword)) {
         score += 10;
@@ -166,37 +253,70 @@ export const matchPromptToTemplate = (prompt: string): TemplateMatch | null => {
       }
     }
 
-    // Check for category match
+    // Synonym matching
+    for (const keyword of template.keywords) {
+      const synonymList = synonyms[keyword] || [];
+      for (const synonym of synonymList) {
+        if (lowerPrompt.includes(synonym) && !matchedKeywords.includes(keyword)) {
+          score += 8;
+          matchedKeywords.push(`${synonym} (${keyword})`);
+        }
+      }
+    }
+
+    // Category match
     if (lowerPrompt.includes(template.category)) {
       score += 15;
     }
 
-    // Check for exact name match
+    // Exact name match
     if (lowerPrompt.includes(template.name.toLowerCase())) {
       score += 25;
     }
 
-    // Bonus for multiple keyword matches
+    // Emotional context bonuses
+    if (emotionalContext === 'urgent' && template.category === 'timer' && template.id.includes('emergency')) {
+      score += 30;
+    }
+    if (emotionalContext === 'stressed' && template.category === 'sensory') {
+      score += 20;
+    }
+    if (emotionalContext === 'focused' && (template.category === 'timer' || template.category === 'focus')) {
+      score += 15;
+    }
+
+    // Multiple keyword bonus
     if (matchedKeywords.length > 1) {
       score += matchedKeywords.length * 5;
     }
 
-    // Special scoring for high-impact keywords
-    const highImpactKeywords = ['medication', 'seizure', 'communication', 'reading', 'smart home', 'memory', 'calculator', 'planner'];
+    // High-impact keyword bonuses
+    const highImpactKeywords = [
+      'emergency', 'seizure', 'medication', 'communication', 'reading', 
+      'smart home', 'memory', 'calculator', 'planner', 'sensory', 'focus', 'timer'
+    ];
     for (const keyword of highImpactKeywords) {
       if (lowerPrompt.includes(keyword)) {
         score += 20;
       }
     }
 
-    const confidence = Math.min(score / 40, 1); // Normalize to 0-1
+    // Intent-based scoring
+    if (lowerPrompt.includes('help') && template.features.some(f => f.includes('support'))) {
+      score += 10;
+    }
+    if (lowerPrompt.includes('need') && template.difficulty === 'basic') {
+      score += 5;
+    }
 
-    if (confidence > 0.25 && score > highestScore) {
+    const confidence = Math.min(score / 50, 1); // Adjusted normalization
+
+    if (confidence > 0.2 && score > highestScore) {
       highestScore = score;
       bestMatch = {
         template,
         confidence,
-        reasoning: `Matched keywords: ${matchedKeywords.join(', ')}`
+        reasoning: `Matched: ${matchedKeywords.join(', ')}${emotionalContext ? ` | Context: ${emotionalContext}` : ''}`
       };
     }
   }

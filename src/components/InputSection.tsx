@@ -31,7 +31,7 @@ const InputSection: React.FC<InputSectionProps> = ({
       <CardContent className="p-8 space-y-6">
         <div className="space-y-6">
           <Textarea
-            placeholder="Try: 'I need help reading text on my screen' or 'Create a medication reminder system' or 'I want to control my smart home with voice commands'..."
+            placeholder="Try: 'I need help staying focused while working' or 'Create an emergency alert system' or 'I feel overwhelmed and need to calm down' or 'Help me manage my daily tasks'..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="min-h-[140px] text-lg border-gray-600/60 bg-gray-700/50 backdrop-blur-sm focus:border-purple-400 focus:ring-purple-400 rounded-xl resize-none text-white placeholder:text-gray-400"
@@ -64,7 +64,7 @@ const InputSection: React.FC<InputSectionProps> = ({
             <div className="p-6 bg-red-900/50 backdrop-blur-sm border border-red-700/60 rounded-xl text-red-300">
               <p className="font-medium">{error}</p>
               <p className="text-sm mt-2 text-red-400">
-                Try describing tools like: "reading assistant", "medication reminder", "communication board", "smart home control"
+                Try describing tools like: "focus timer", "emergency alert", "sensory break", "task planner", "reading help", or "medication reminder"
               </p>
             </div>
           )}
