@@ -28,9 +28,9 @@ const Sidebar: React.FC<SidebarProps> = ({ availableTemplates, onSelectTemplate 
               className="w-full justify-start border-gray-600/60 bg-gray-800/70 hover:bg-gray-700/90 h-auto py-4 px-4 backdrop-blur-sm transition-all duration-300 hover:shadow-lg rounded-xl text-gray-200 hover:text-white"
               onClick={() => onSelectTemplate(template)}
             >
-              <div className="text-left">
-                <div className="font-semibold text-sm text-gray-200">{template.name}</div>
-                <div className="text-xs text-gray-400 mt-1 line-clamp-2">{template.description}</div>
+              <div className="text-left w-full overflow-hidden">
+                <div className="font-semibold text-sm text-gray-200 truncate">{template.name}</div>
+                <div className="text-xs text-gray-400 mt-1 leading-relaxed break-words hyphens-auto">{template.description}</div>
               </div>
             </Button>
           ))}
