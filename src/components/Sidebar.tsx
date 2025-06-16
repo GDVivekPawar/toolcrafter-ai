@@ -13,19 +13,20 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ availableTemplates, onSelectTemplate }) => {
   return (
     <div className="space-y-8">
-      <Card className="border-gray-700/40 shadow-2xl bg-gradient-to-br from-green-900/50 to-blue-900/50 backdrop-blur-xl">
+      <Card className="border-gray-700/40 shadow-2xl bg-gradient-to-br from-green-900/50 to-blue-900/50 backdrop-blur-xl animate-fade-in">
         <CardHeader className="bg-gradient-to-r from-green-500 to-blue-500 text-white">
           <CardTitle className="text-lg flex items-center space-x-2">
-            <Zap className="h-5 w-5" />
+            <Zap className="h-5 w-5 animate-bounce-gentle" />
             <span>Featured Tools</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
-          {availableTemplates.slice(0, 3).map((template) => (
+          {availableTemplates.slice(0, 4).map((template, index) => (
             <Button
               key={template.id}
               variant="outline"
-              className="w-full justify-start border-gray-600/60 bg-gray-800/70 hover:bg-gray-700/90 h-auto py-4 px-4 backdrop-blur-sm transition-all duration-300 hover:shadow-lg rounded-xl text-gray-200 hover:text-white"
+              className="w-full justify-start border-gray-600/60 bg-gray-800/70 hover:bg-gray-700/90 h-auto py-4 px-4 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:scale-105 rounded-xl text-gray-200 hover:text-white animate-fade-in"
+              style={{ animationDelay: `${index * 150}ms` }}
               onClick={() => onSelectTemplate(template)}
             >
               <div className="text-left w-full overflow-hidden">
@@ -37,29 +38,29 @@ const Sidebar: React.FC<SidebarProps> = ({ availableTemplates, onSelectTemplate 
         </CardContent>
       </Card>
 
-      <Card className="border-gray-700/40 shadow-2xl bg-gradient-to-br from-yellow-900/50 to-orange-900/50 backdrop-blur-xl">
+      <Card className="border-gray-700/40 shadow-2xl bg-gradient-to-br from-yellow-900/50 to-orange-900/50 backdrop-blur-xl animate-fade-in" style={{ animationDelay: '600ms' }}>
         <CardHeader>
           <CardTitle className="text-lg text-orange-300 flex items-center space-x-2">
-            <Heart className="h-5 w-5" />
+            <Heart className="h-5 w-5 animate-float" />
             <span>Why ToolCrafter.Ai?</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6 text-sm text-orange-200 space-y-3">
           <ul className="space-y-2">
-            <li className="flex items-start space-x-2">
-              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+            <li className="flex items-start space-x-2 animate-fade-in" style={{ animationDelay: '800ms' }}>
+              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0 animate-pulse-gentle"></div>
               <span>AI understands your unique needs</span>
             </li>
-            <li className="flex items-start space-x-2">
-              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+            <li className="flex items-start space-x-2 animate-fade-in" style={{ animationDelay: '900ms' }}>
+              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0 animate-pulse-gentle"></div>
               <span>Instantly deployed, ready to use</span>
             </li>
-            <li className="flex items-start space-x-2">
-              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+            <li className="flex items-start space-x-2 animate-fade-in" style={{ animationDelay: '1000ms' }}>
+              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0 animate-pulse-gentle"></div>
               <span>Designed by accessibility experts</span>
             </li>
-            <li className="flex items-start space-x-2">
-              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0"></div>
+            <li className="flex items-start space-x-2 animate-fade-in" style={{ animationDelay: '1100ms' }}>
+              <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0 animate-pulse-gentle"></div>
               <span>Works on all devices and browsers</span>
             </li>
           </ul>

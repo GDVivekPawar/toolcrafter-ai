@@ -1,4 +1,3 @@
-
 import { ToolTemplate, TemplateMatch } from '@/types/template';
 import ReadingAssistant from '@/templates/ReadingAssistant';
 import MedicationReminder from '@/templates/MedicationReminder';
@@ -6,8 +5,44 @@ import CommunicationBoard from '@/templates/CommunicationBoard';
 import EnvironmentalControl from '@/templates/EnvironmentalControl';
 import MemoryPalace from '@/templates/MemoryPalace';
 import SeizureAlert from '@/templates/SeizureAlert';
+import Calculator from '@/templates/Calculator';
+import DailyPlanner from '@/templates/DailyPlanner';
 
 export const availableTemplates: ToolTemplate[] = [
+  {
+    id: 'calculator',
+    name: 'Accessible Calculator',
+    description: 'Large button calculator with screen reader support and keyboard navigation',
+    category: 'focus',
+    keywords: ['calculator', 'math', 'numbers', 'arithmetic', 'compute', 'calculate', 'addition', 'subtraction', 'multiplication', 'division'],
+    component: Calculator,
+    features: [
+      'Large, high-contrast buttons',
+      'Screen reader announcements',
+      'Keyboard navigation support',
+      'Clear audio feedback',
+      'Simple operation display',
+      'Error prevention features'
+    ],
+    difficulty: 'basic'
+  },
+  {
+    id: 'daily-planner',
+    name: 'Daily Task Planner',
+    description: 'Accessible task management with progress tracking and time estimation',
+    category: 'planner',
+    keywords: ['planner', 'tasks', 'todo', 'schedule', 'organize', 'daily', 'time', 'management', 'productivity', 'checklist'],
+    component: DailyPlanner,
+    features: [
+      'Task creation and management',
+      'Progress tracking visualization',
+      'Time estimation for tasks',
+      'Completion status tracking',
+      'Screen reader friendly',
+      'Keyboard accessible interface'
+    ],
+    difficulty: 'basic'
+  },
   {
     id: 'reading-assistant',
     name: 'Reading Assistant',
@@ -147,7 +182,7 @@ export const matchPromptToTemplate = (prompt: string): TemplateMatch | null => {
     }
 
     // Special scoring for high-impact keywords
-    const highImpactKeywords = ['medication', 'seizure', 'communication', 'reading', 'smart home', 'memory'];
+    const highImpactKeywords = ['medication', 'seizure', 'communication', 'reading', 'smart home', 'memory', 'calculator', 'planner'];
     for (const keyword of highImpactKeywords) {
       if (lowerPrompt.includes(keyword)) {
         score += 20;

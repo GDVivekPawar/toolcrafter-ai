@@ -17,12 +17,14 @@ interface TemplatePreviewProps {
 const getHowToUseText = (templateId: string | undefined): string => {
   if (!templateId) return "No instructions available for this tool.";
   switch (templateId) {
+    case 'calculator':
+      return "To use the Calculator, click the number buttons to enter numbers. Use the operation buttons plus, minus, multiply, and divide to perform calculations. Press equals to see the result. The Clear button, marked C, will reset the calculator. The display shows your current number or result.";
+    case 'daily-planner':
+      return "To use the Daily Planner, type a task in the input box. You can also add a time estimate. Click 'Add Task' to add it to your list. Check the box next to a task to mark it as complete, and use the trash icon to delete it. The progress bar shows how many tasks you've completed.";
     case 'focus-timer':
       return "To use the Focus Timer, first set your desired work duration using the plus and minus one minute buttons. When you are ready, press Start. The timer will count down. You can pause and resume the timer at any time. Press Reset to start over with the default 25 minutes.";
     case 'medication-reminder':
       return "To use the Medication Reminder, add a new medication by typing its name, selecting a time, and clicking 'Add Reminder'. Your reminders will appear in the list. When you take your medication, click the 'Take' button to mark it as complete. The button will change to 'Taken'. You can click it again to undo.";
-    case 'daily-planner':
-      return "To use the Daily Planner, type a task in the input box. You can also add a time estimate. Click 'Add Task' to add it to your list. Check the box next to a task to mark it as complete, and use the trash icon to delete it.";
     case 'environmental-control':
       return "With the Environmental Control Hub, you can manage your surroundings. Use the large buttons to turn lights, the TV, and the security system on or off. Adjust the temperature, brightness, and audio volume using the sliders.";
     case 'sensory-break':
